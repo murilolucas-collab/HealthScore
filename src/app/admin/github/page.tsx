@@ -113,8 +113,7 @@ export default function GithubConfigPage() {
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Sincronização com GitHub</h1>
         <p className="text-sm text-neutral-500">
-          Guarda uma cópia dos dados em <code>data/db.json</code> dentro do repositório escolhido, sincronizando
-          automaticamente sempre que algo muda por aqui.
+          Guarda uma cópia dos dados em <code>data/db.json</code> .
         </p>
       </div>
 
@@ -161,8 +160,7 @@ export default function GithubConfigPage() {
             </button>
           </div>
           <p className="text-xs text-neutral-400 mt-3">
-            Depois de qualquer alteração no app (cadastro, resposta, cálculo de risco...), o envio automático para o
-            GitHub acontece sozinho, poucos segundos depois.
+            .
           </p>
         </Card>
       ) : (
