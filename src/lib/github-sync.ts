@@ -1,15 +1,6 @@
 "use client";
 
-// Sincroniza os dados do app com um arquivo JSON dentro de um repositório
-// GitHub (via API REST de Conteúdo). O token de acesso fica salvo só no
-// localStorage deste navegador — nunca no código-fonte do site.
-//
-// Fluxo:
-// - Ao iniciar o app, busca o arquivo mais recente no GitHub e substitui os
-//   dados locais por ele (se o arquivo ainda não existir, cria a partir dos
-//   dados locais atuais).
-// - Sempre que algo muda localmente, agenda (com um pequeno atraso) o envio
-//   da versão atual para o GitHub.
+
 
 import { useEffect, useRef } from "react";
 import { getDb, substituirDb, garantirSeed } from "./store";
@@ -63,7 +54,7 @@ function setSha(sha: string | null) {
   else window.localStorage.removeItem(SHA_KEY);
 }
 
-/** Registra o sha do último conteúdo remoto conhecido (uso após buscar manualmente). */
+
 export function registrarShaConhecido(sha: string) {
   setSha(sha);
 }
@@ -179,12 +170,7 @@ export async function salvarDbRemoto(cfg: GithubConfig, db: Database): Promise<{
 
 let sincronizando = false;
 
-/**
- * Chamado uma vez ao carregar o app. Se houver integração configurada,
- * busca os dados mais recentes do GitHub e substitui os dados locais. Se o
- * arquivo ainda não existir no repositório, cria a partir dos dados locais
- * atuais (semeando dados de exemplo se estiver tudo vazio).
- */
+
 export async function sincronizarNaInicializacao(): Promise<void> {
   const cfg = getGithubConfig();
   if (!cfg) {
@@ -210,11 +196,7 @@ export async function sincronizarNaInicializacao(): Promise<void> {
   }
 }
 
-/**
- * Hook que salva automaticamente no GitHub (com um pequeno atraso) sempre
- * que os dados locais mudam, caso a integração esteja configurada. Sem
- * integração configurada, não faz nada.
- */
+
 export function useGithubAutoSync() {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
