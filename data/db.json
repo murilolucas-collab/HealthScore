@@ -1,0 +1,367 @@
+{
+  "usuarios": [
+    {
+      "id": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "nome": "Admin Geral",
+      "email": "admin@agencia.com",
+      "senhaHash": "$2b$10$.BEl8dchvMLDqmdpg/o80u38ETGnW3RxgO6XGMSsYP9I3y7QuXxmC",
+      "papel": "ADMIN",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "usuario_8d1ab887-aee4-43ee-9690-18eda92cc53e",
+      "nome": "Ana CS",
+      "email": "cs@agencia.com",
+      "senhaHash": "$2b$10$t/QgbH1wGa8Zsb3BRNMvEe8n/L9CIIsXZ8VMaUf/lm8.Kkwb62BdS",
+      "papel": "PADRAO",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    }
+  ],
+  "acessosProjeto": [
+    {
+      "id": "acesso_e5fc4802-72db-4dcc-9fec-cc9ac640915b",
+      "usuarioId": "usuario_8d1ab887-aee4-43ee-9690-18eda92cc53e",
+      "projetoId": "projeto_f51d4535-be33-4ca8-8b68-d162f5acf414",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "acesso_b6ead4ef-4ddc-4934-8465-ade3483dddc5",
+      "usuarioId": "usuario_8d1ab887-aee4-43ee-9690-18eda92cc53e",
+      "projetoId": "projeto_0d93f7bd-8482-4c51-bdb0-cddf9bce6609",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    }
+  ],
+  "clientes": [
+    {
+      "id": "cliente_0a3a98c0-80dd-4e1d-9fbd-b9140465d562",
+      "nome": "Loja Exemplo Ltda",
+      "cnpj": null,
+      "segmento": "E-commerce",
+      "inicioContrato": "2025-01-15",
+      "status": "ATIVO",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "cliente_7393dd99-eadd-4fe8-9055-1bcebd0dbd1b",
+      "nome": "Pharma Vida Saúde",
+      "cnpj": null,
+      "segmento": "Saúde/Farma",
+      "inicioContrato": "2026-06-01",
+      "status": "ATIVO",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
+      "nome": "Grupo Comércio Geral",
+      "cnpj": null,
+      "segmento": "Varejo",
+      "inicioContrato": "2026-06-01",
+      "status": "ATIVO",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
+      "nome": "VUPT Mobilidade",
+      "cnpj": null,
+      "segmento": "Mobilidade/Transporte",
+      "inicioContrato": "2026-06-01",
+      "status": "ATIVO",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "cliente_b5c39e90-c493-41c4-87a5-97f4aee3159b",
+      "nome": "TESTE123",
+      "cnpj": "1231",
+      "segmento": "123",
+      "inicioContrato": "1222-02-22",
+      "status": "ATIVO",
+      "criadoEm": "2026-08-29T02:44:45.432Z"
+    }
+  ],
+  "metasCliente": [],
+  "registrosMeta": [],
+  "formulariosSaida": [],
+  "contatosCliente": [
+    {
+      "id": "contato_c28a5634-07de-4af8-a7a2-a75eaf8f9a84",
+      "clienteId": "cliente_0a3a98c0-80dd-4e1d-9fbd-b9140465d562",
+      "nome": "Carla Souza",
+      "cargo": "Marketing Manager",
+      "email": "carla@lojaexemplo.com",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "contato_e6f7995b-588c-477c-8fdb-9aa93133a79b",
+      "clienteId": "cliente_7393dd99-eadd-4fe8-9055-1bcebd0dbd1b",
+      "nome": "Renata Alves",
+      "cargo": null,
+      "email": "renata@pharmavida.com",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "contato_90cf37e3-39bb-43b9-8a2e-324bef949ff0",
+      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
+      "nome": "Bruno Lima",
+      "cargo": null,
+      "email": "bruno@comerciogeral.com",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "contato_b01d1b8f-8a0e-43c3-98ce-6851b8bf8ffd",
+      "clienteId": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
+      "nome": "Fernanda Costa",
+      "cargo": null,
+      "email": "fernanda@vupt.com",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "contato_a543f727-8d49-44b4-8081-fc31651c0ca7",
+      "clienteId": "cliente_b5c39e90-c493-41c4-87a5-97f4aee3159b",
+      "nome": "123",
+      "email": "123@123.com",
+      "cargo": "123",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-08-29T02:44:45.432Z"
+    }
+  ],
+  "eventosCliente": [],
+  "perfisRisco": [
+    {
+      "id": "perfil_30e27817-4ea5-4e56-8c04-b152b24ad887",
+      "clienteId": "cliente_0a3a98c0-80dd-4e1d-9fbd-b9140465d562",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "perfil_05c72017-b123-42be-a1e7-21fefe8935de",
+      "clienteId": "cliente_7393dd99-eadd-4fe8-9055-1bcebd0dbd1b",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "perfil_0dfabe10-e8fa-4e0a-9f31-d21b1190cabc",
+      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "perfil_8d75f6bc-2889-40b8-95e8-dbdaf68210bb",
+      "clienteId": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "perfil_c74404f7-fc3a-453c-8659-1c83cde7fba1",
+      "clienteId": "cliente_b5c39e90-c493-41c4-87a5-97f4aee3159b",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-08-29T02:44:45.432Z"
+    }
+  ],
+  "projetos": [
+    {
+      "id": "projeto_f51d4535-be33-4ca8-8b68-d162f5acf414",
+      "nome": "Gestão de Marketing 360 - Loja Exemplo",
+      "clienteId": "cliente_0a3a98c0-80dd-4e1d-9fbd-b9140465d562",
+      "dataInicio": "2025-01-15",
+      "status": "ATIVO",
+      "csResponsavelId": "usuario_8d1ab887-aee4-43ee-9690-18eda92cc53e",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "projeto_0d93f7bd-8482-4c51-bdb0-cddf9bce6609",
+      "nome": "Código Pharma",
+      "clienteId": "cliente_7393dd99-eadd-4fe8-9055-1bcebd0dbd1b",
+      "dataInicio": "2026-06-01",
+      "status": "ATIVO",
+      "csResponsavelId": "usuario_8d1ab887-aee4-43ee-9690-18eda92cc53e",
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "projeto_8d54e972-c475-45cc-b949-b659e814cf4a",
+      "nome": "Marketing Geral",
+      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
+      "dataInicio": "2026-06-01",
+      "status": "ATIVO",
+      "csResponsavelId": null,
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "projeto_ced8b574-8ae3-4d74-ae18-e5859a8f3b8a",
+      "nome": "VUPT ADS",
+      "clienteId": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
+      "dataInicio": "2026-06-01",
+      "status": "ATIVO",
+      "csResponsavelId": null,
+      "criadoEm": "2026-08-29T02:43:59.279Z"
+    }
+  ],
+  "configuracoesCiclo": [
+    {
+      "id": "config_30aafa05-a8a1-471a-8d19-2472aafee553",
+      "projetoId": "projeto_f51d4535-be33-4ca8-8b68-d162f5acf414",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    },
+    {
+      "id": "config_3eabed41-a369-43d0-8fe5-90d5f4d3975e",
+      "projetoId": "projeto_0d93f7bd-8482-4c51-bdb0-cddf9bce6609",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    },
+    {
+      "id": "config_95e59237-8608-4323-927b-6271dbef24e7",
+      "projetoId": "projeto_8d54e972-c475-45cc-b949-b659e814cf4a",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    },
+    {
+      "id": "config_a5a1fc6c-f0e5-469e-ac8e-45e4acda520d",
+      "projetoId": "projeto_ced8b574-8ae3-4d74-ae18-e5859a8f3b8a",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    }
+  ],
+  "perguntasTemplate": [
+    {
+      "id": "pergunta_808da3cb-8e37-4bb4-9e55-2341a545bccd",
+      "texto": "De 0 a 10, quanto você recomendaria a agência para alguém?",
+      "polo": "ATIVO",
+      "nicho": null,
+      "pilar": null,
+      "tipoEscala": "NPS_0_10",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_6ff436bb-3e78-4b9d-b1c4-840c01027a05",
+      "texto": "Como você avalia o atendimento da agência?",
+      "polo": "ATIVO",
+      "nicho": "COMUNICACAO",
+      "pilar": null,
+      "tipoEscala": "BOM_REGULAR_RUIM",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_2f13aa93-6562-4ca4-8549-ba1be05757ec",
+      "texto": "Como você avalia a qualidade das artes feitas pela agência?",
+      "polo": "ATIVO",
+      "nicho": "ARTE",
+      "pilar": null,
+      "tipoEscala": "BOM_REGULAR_RUIM",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_fea64f5d-550c-4e1a-b5f6-36f7f5280d5f",
+      "texto": "Como você avalia a qualidade dos anúncios online feitos pela agência?",
+      "polo": "ATIVO",
+      "nicho": "GESTAO_TRAFEGO",
+      "pilar": null,
+      "tipoEscala": "BOM_REGULAR_RUIM",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_a77303db-eb51-4dfc-b562-bcafff789295",
+      "texto": "Avalie o tempo de resposta da equipe às demandas e solicitações do cliente.",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "TEMPO_RESPOSTA",
+      "tipoEscala": "NPS_0_10",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_6ac452bb-cd13-4071-9c5e-44c318fbf49f",
+      "texto": "Avalie a qualidade técnica e criativa das entregas realizadas neste ciclo.",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "QUALIDADE_ENTREGA",
+      "tipoEscala": "NPS_0_10",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_8e97196c-38cc-4ea7-935b-4bec7327136e",
+      "texto": "Avalie o cumprimento dos prazos combinados com o cliente.",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "CUMPRIMENTO_PRAZOS",
+      "tipoEscala": "NPS_0_10",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_d9ca313f-7987-4301-809b-3a5cc46a2082",
+      "texto": "Avalie a proatividade da equipe em comunicar riscos, mudanças e resultados ao cliente.",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "COMUNICACAO_PROATIVA",
+      "tipoEscala": "NPS_0_10",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_417206de-08b9-456c-b92b-18dd4dba3f18",
+      "texto": "Avalie os resultados/performance entregues frente às metas do projeto.",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "RESULTADOS_PERFORMANCE",
+      "tipoEscala": "NPS_0_10",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_0ca6ff30-8316-45a4-b9ae-ccbb54ae62f5",
+      "texto": "Quantas reuniões foram marcadas e quantas foram realizadas neste ciclo?",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "REUNIOES_COMPARECIMENTO",
+      "tipoEscala": "REUNIOES_MARCADAS_REALIZADAS",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_ae604047-ac0e-48b9-b9df-519f31a62854",
+      "texto": "Em média, em quanto tempo o cliente responde às solicitações da equipe?",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "TEMPO_RESPOSTA_CLIENTE",
+      "tipoEscala": "TEMPO_RESPOSTA_BUCKETS",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_9b675ddd-f219-43bf-8b16-10f6edcfcfe4",
+      "texto": "A equipe entregou a quantidade de demandas combinada neste ciclo?",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "DEMANDA_QUANTIDADE",
+      "tipoEscala": "NPS_0_10",
+      "ativo": true
+    },
+    {
+      "id": "pergunta_fd372a48-25e1-4d16-abc3-17893ab61b78",
+      "texto": "O cliente está com os pagamentos em dia?",
+      "polo": "PASSIVO",
+      "nicho": null,
+      "pilar": "PAGAMENTO_EM_DIA",
+      "tipoEscala": "SIM_NAO",
+      "ativo": true
+    }
+  ],
+  "ciclosAvaliacao": [],
+  "respostasAtivas": [],
+  "respostasPassivas": [],
+  "pontuacoesCategoria": [],
+  "riscosChurn": [],
+  "indicadoresDesempenho": []
+}
