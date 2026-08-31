@@ -64,7 +64,7 @@
       "cnpj": null,
       "segmento": "Varejo",
       "inicioContrato": "2026-06-01",
-      "status": "ATIVO",
+      "status": "INATIVO",
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
@@ -99,6 +99,17 @@
       "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataSaida": "2026-08-29T02:52:42.651Z",
       "criadoEm": "2026-08-29T02:52:42.651Z"
+    },
+    {
+      "id": "saida_6de38b24-3e34-4efe-8bce-528ff4d1e323",
+      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
+      "motivoPrincipal": "ATENDIMENTO_COMUNICACAO",
+      "detalhamento": "123123",
+      "poderiaSerEvitado": false,
+      "notaSatisfacaoGeral": 2,
+      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataSaida": "2026-08-31T12:26:39.509Z",
+      "criadoEm": "2026-08-31T12:26:39.509Z"
     }
   ],
   "contatosCliente": [
