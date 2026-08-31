@@ -58,7 +58,7 @@
       "cnpj": null,
       "segmento": "E-commerce",
       "inicioContrato": "2025-01-15",
-      "status": "ATIVO",
+      "status": "INATIVO",
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
@@ -133,6 +133,17 @@
       "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataSaida": "2026-08-31T12:31:12.479Z",
       "criadoEm": "2026-08-31T12:31:12.479Z"
+    },
+    {
+      "id": "saida_e88841f1-dc6e-4c3b-8d4a-866488a1047a",
+      "clienteId": "cliente_0a3a98c0-80dd-4e1d-9fbd-b9140465d562",
+      "motivoPrincipal": "ATENDIMENTO_COMUNICACAO",
+      "detalhamento": "1",
+      "poderiaSerEvitado": true,
+      "notaSatisfacaoGeral": 1,
+      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataSaida": "2026-08-31T12:32:07.321Z",
+      "criadoEm": "2026-08-31T12:32:07.321Z"
     }
   ],
   "contatosCliente": [
