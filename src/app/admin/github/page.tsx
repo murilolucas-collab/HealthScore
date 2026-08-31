@@ -113,7 +113,7 @@ export default function GithubConfigPage() {
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Sincronização com GitHub</h1>
         <p className="text-sm text-neutral-500">
-          Guarda uma cópia dos dados em <code>data/db.json</code> .
+          .
         </p>
       </div>
 
@@ -182,7 +182,7 @@ export default function GithubConfigPage() {
               <label className="block text-sm font-medium text-neutral-700 mb-1">Token de acesso pessoal</label>
               <input name="token" type="password" required placeholder="github_pat_..." className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
               <p className="text-xs text-neutral-400 mt-1">
-                Fica salvo só neste navegador (localStorage), nunca no código do site.
+                .
               </p>
             </div>
             <button
