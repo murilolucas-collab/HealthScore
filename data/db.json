@@ -67,7 +67,7 @@
       "cnpj": null,
       "segmento": "Saúde/Farma",
       "inicioContrato": "2026-06-01",
-      "status": "ATIVO",
+      "status": "INATIVO",
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
@@ -122,6 +122,17 @@
       "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataSaida": "2026-08-31T12:26:39.509Z",
       "criadoEm": "2026-08-31T12:26:39.509Z"
+    },
+    {
+      "id": "saida_f60dfd1f-1bcc-453d-af5a-008fe58fabcf",
+      "clienteId": "cliente_7393dd99-eadd-4fe8-9055-1bcebd0dbd1b",
+      "motivoPrincipal": "PRECO",
+      "detalhamento": "1",
+      "poderiaSerEvitado": true,
+      "notaSatisfacaoGeral": 10,
+      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataSaida": "2026-08-31T12:31:12.479Z",
+      "criadoEm": "2026-08-31T12:31:12.479Z"
     }
   ],
   "contatosCliente": [
