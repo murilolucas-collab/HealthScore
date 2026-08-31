@@ -85,7 +85,7 @@
       "cnpj": null,
       "segmento": "Mobilidade/Transporte",
       "inicioContrato": "2026-06-01",
-      "status": "ATIVO",
+      "status": "INATIVO",
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
@@ -144,6 +144,17 @@
       "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataSaida": "2026-08-31T12:32:07.321Z",
       "criadoEm": "2026-08-31T12:32:07.321Z"
+    },
+    {
+      "id": "saida_3991bfc1-8047-4772-b70b-df49aef4efdc",
+      "clienteId": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
+      "motivoPrincipal": "ATENDIMENTO_COMUNICACAO",
+      "detalhamento": "123",
+      "poderiaSerEvitado": true,
+      "notaSatisfacaoGeral": 2,
+      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataSaida": "2026-08-31T12:32:31.066Z",
+      "criadoEm": "2026-08-31T12:32:31.066Z"
     }
   ],
   "contatosCliente": [
