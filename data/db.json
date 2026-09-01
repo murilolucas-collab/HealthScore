@@ -90,6 +90,15 @@
       "inicioContrato": "1222-02-22",
       "status": "INATIVO",
       "criadoEm": "2026-08-29T02:44:45.432Z"
+    },
+    {
+      "id": "cliente_2eb3c7c0-06ad-4208-ac5f-742176d6c78a",
+      "nome": "TESTE123",
+      "cnpj": "1231",
+      "segmento": "123",
+      "inicioContrato": "1111-11-11",
+      "status": "ATIVO",
+      "criadoEm": "2026-09-01T17:18:36.775Z"
     }
   ],
   "metasCliente": [],
@@ -201,6 +210,16 @@
       "telefone": null,
       "principal": true,
       "criadoEm": "2026-08-29T02:44:45.432Z"
+    },
+    {
+      "id": "contato_633329e3-aec1-4ec8-98dd-74b737ba69b6",
+      "clienteId": "cliente_2eb3c7c0-06ad-4208-ac5f-742176d6c78a",
+      "nome": "111",
+      "email": "123@123.com",
+      "cargo": "123",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-09-01T17:18:36.775Z"
     }
   ],
   "eventosCliente": [],
@@ -239,6 +258,13 @@
       "propensaoRisco": 0,
       "tendencia": "ESTAVEL",
       "atualizadoEm": "2026-08-29T02:44:45.432Z"
+    },
+    {
+      "id": "perfil_edb23534-d585-4cf6-827e-2dae4ed01d78",
+      "clienteId": "cliente_2eb3c7c0-06ad-4208-ac5f-742176d6c78a",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-09-01T17:18:36.775Z"
     }
   ],
   "projetos": [
