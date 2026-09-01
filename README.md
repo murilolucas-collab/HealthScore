@@ -4,5 +4,5 @@
 
 ```
 
-Acesse http://3phealthscore.netlify.app.
+Acesse https://healthscore.s.gy/app.
 
