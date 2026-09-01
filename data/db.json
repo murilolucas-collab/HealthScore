@@ -17,7 +17,14 @@
       "criadoEm": "2026-09-01T17:27:46.299Z"
     }
   ],
-  "acessosProjeto": [],
+  "acessosProjeto": [
+    {
+      "id": "acesso_2becf321-ce6f-4780-a1bc-5108e56de7ea",
+      "usuarioId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "projetoId": "projeto_58e38a91-5927-42ef-a41a-7cd9e7a64e84",
+      "criadoEm": "2026-09-01T22:26:44.847Z"
+    }
+  ],
   "clientes": [
     {
       "id": "cliente_496a6dd5-2b74-43db-8f4b-2207fe70bbca",
@@ -54,8 +61,26 @@
       "atualizadoEm": "2026-09-01T22:26:22.860Z"
     }
   ],
-  "projetos": [],
-  "configuracoesCiclo": [],
+  "projetos": [
+    {
+      "id": "projeto_58e38a91-5927-42ef-a41a-7cd9e7a64e84",
+      "nome": "TESTE123",
+      "clienteId": "cliente_496a6dd5-2b74-43db-8f4b-2207fe70bbca",
+      "csResponsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataInicio": "2026-09-17",
+      "status": "ATIVO",
+      "criadoEm": "2026-09-01T22:26:44.847Z"
+    }
+  ],
+  "configuracoesCiclo": [
+    {
+      "id": "config_e167dd61-3c70-44b6-b8ad-74ce6f4c1824",
+      "projetoId": "projeto_58e38a91-5927-42ef-a41a-7cd9e7a64e84",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    }
+  ],
   "perguntasTemplate": [
     {
       "id": "pergunta_808da3cb-8e37-4bb4-9e55-2341a545bccd",
