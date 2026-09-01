@@ -277,6 +277,15 @@
       "status": "ATIVO",
       "csResponsavelId": null,
       "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "projeto_bdc40cd4-8403-4632-8e40-9ac7e2a4e292",
+      "nome": "TESTE123",
+      "clienteId": "cliente_0a3a98c0-80dd-4e1d-9fbd-b9140465d562",
+      "csResponsavelId": null,
+      "dataInicio": null,
+      "status": "ATIVO",
+      "criadoEm": "2026-09-01T17:18:09.582Z"
     }
   ],
   "configuracoesCiclo": [
@@ -304,6 +313,13 @@
     {
       "id": "config_a5a1fc6c-f0e5-469e-ac8e-45e4acda520d",
       "projetoId": "projeto_ced8b574-8ae3-4d74-ae18-e5859a8f3b8a",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    },
+    {
+      "id": "config_b8ebc710-b27e-4a75-aaee-cc38f4acac91",
+      "projetoId": "projeto_bdc40cd4-8403-4632-8e40-9ac7e2a4e292",
       "periodicidade": "MENSAL",
       "diaDisparo": 1,
       "ativo": true
