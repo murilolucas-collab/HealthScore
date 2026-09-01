@@ -166,7 +166,7 @@ export default function ClienteDetalhePage() {
   function handleExcluir() {
     if (
       !window.confirm(
-        `Excluir "${cliente.nome}" definitivamente? Isso apaga também todos os projetos, ciclos, respostas e histórico desse cliente. Não pode ser desfeito.`
+        `Excluir "${cliente!.nome}" definitivamente? Isso apaga também todos os projetos, ciclos, respostas e histórico desse cliente. Não pode ser desfeito.`
       )
     ) {
       return;

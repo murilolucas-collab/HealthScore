@@ -132,7 +132,7 @@ export default function ProjetoDetalhePage() {
   function handleExcluir() {
     if (
       !window.confirm(
-        `Excluir o projeto "${projeto.nome}"? Isso remove todos os ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`
+        `Excluir o projeto "${projeto!.nome}"? Isso remove todos os ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`
       )
     ) {
       return;
