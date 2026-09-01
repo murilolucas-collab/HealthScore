@@ -97,7 +97,7 @@
       "cnpj": "1231",
       "segmento": "123",
       "inicioContrato": "1111-11-11",
-      "status": "ATIVO",
+      "status": "INATIVO",
       "criadoEm": "2026-09-01T17:18:36.775Z"
     }
   ],
@@ -158,6 +158,17 @@
       "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataSaida": "2026-08-31T12:32:31.066Z",
       "criadoEm": "2026-08-31T12:32:31.066Z"
+    },
+    {
+      "id": "saida_f52be355-1552-4726-94f3-74b79ce5df02",
+      "clienteId": "cliente_2eb3c7c0-06ad-4208-ac5f-742176d6c78a",
+      "motivoPrincipal": "RESULTADOS_INSATISFATORIOS",
+      "detalhamento": "123",
+      "poderiaSerEvitado": true,
+      "notaSatisfacaoGeral": 1,
+      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataSaida": "2026-09-01T17:18:45.632Z",
+      "criadoEm": "2026-09-01T17:18:45.632Z"
     }
   ],
   "contatosCliente": [
