@@ -38,13 +38,25 @@
       "cnpj": "1231",
       "segmento": "123",
       "inicioContrato": "2026-09-08",
-      "status": "ATIVO",
+      "status": "INATIVO",
       "criadoEm": "2026-09-01T22:26:22.860Z"
     }
   ],
   "metasCliente": [],
   "registrosMeta": [],
-  "formulariosSaida": [],
+  "formulariosSaida": [
+    {
+      "id": "saida_a715508f-d074-4cd9-b55a-bd68282d6d20",
+      "clienteId": "cliente_496a6dd5-2b74-43db-8f4b-2207fe70bbca",
+      "motivoPrincipal": "PRECO",
+      "detalhamento": "caro",
+      "poderiaSerEvitado": true,
+      "notaSatisfacaoGeral": 6,
+      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataSaida": "2026-09-01T22:34:08.714Z",
+      "criadoEm": "2026-09-01T22:34:08.714Z"
+    }
+  ],
   "contatosCliente": [
     {
       "id": "contato_494feddc-82a7-4156-8c5d-7c843d23c15d",
