@@ -211,5 +211,15 @@
   "respostasPassivas": [],
   "pontuacoesCategoria": [],
   "riscosChurn": [],
-  "indicadoresDesempenho": []
+  "indicadoresDesempenho": [
+    {
+      "id": "indicador_18c84738-7d9b-4991-82f2-0587acf45de5",
+      "projetoId": "projeto_58e38a91-5927-42ef-a41a-7cd9e7a64e84",
+      "periodo": "01-2026",
+      "indiceEngajamento": 80,
+      "indiceAdocao": 80,
+      "indiceMaturidade": 50,
+      "criadoEm": "2026-09-01T22:29:02.923Z"
+    }
+  ]
 }
