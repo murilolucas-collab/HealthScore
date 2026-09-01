@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { mutateDb, novoId } from "@/lib/store";
+import { mutateDb, novoId, excluirUsuario } from "@/lib/store";
 import { Card } from "@/components/ui";
 import bcrypt from "bcryptjs";
 import type { PapelUsuario } from "@/lib/types";
@@ -57,6 +57,21 @@ export default function UsuariosPage() {
     e.currentTarget.reset();
   }
 
+  function handleExcluir(alvo: { id: string; nome: string; papel: PapelUsuario }) {
+    if (alvo.id === user!.id) {
+      alert("Você não pode excluir o próprio usuário logado.");
+      return;
+    }
+    if (alvo.papel === "ADMIN" && db!.usuarios.filter((u) => u.papel === "ADMIN").length <= 1) {
+      alert("Não é possível excluir o último administrador.");
+      return;
+    }
+    if (!window.confirm(`Excluir o usuário "${alvo.nome}"? Ele perde acesso imediatamente. Essa ação não pode ser desfeita.`)) {
+      return;
+    }
+    mutateDb((dbW) => excluirUsuario(dbW, alvo.id));
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-lg font-semibold text-neutral-900">Usuários</h1>
@@ -87,7 +102,15 @@ export default function UsuariosPage() {
                 </div>
               )}
             </div>
-            <span className="text-xs uppercase text-neutral-400">{u.papel}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs uppercase text-neutral-400">{u.papel}</span>
+              <button
+                onClick={() => handleExcluir(u)}
+                className="text-xs text-red-600 underline hover:text-red-800"
+              >
+                Excluir
+              </button>
+            </div>
           </Card>
         ))}
       </div>

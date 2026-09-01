@@ -22,9 +22,6 @@ export default function GithubConfigPage() {
   const [mensagem, setMensagem] = useState<{ tipo: "ok" | "erro"; texto: string } | null>(null);
 
   if (!pronto || !user) return null;
-  if (user.papel !== "ADMIN") {
-    return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
-  }
 
   async function handleSalvarConfig(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -112,9 +109,6 @@ export default function GithubConfigPage() {
     <div className="max-w-xl space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">Sincronização com GitHub</h1>
-        <p className="text-sm text-neutral-500">
-          .
-        </p>
       </div>
 
       {mensagem && (
@@ -159,9 +153,6 @@ export default function GithubConfigPage() {
               Desconectar
             </button>
           </div>
-          <p className="text-xs text-neutral-400 mt-3">
-            .
-          </p>
         </Card>
       ) : (
         <Card>
@@ -181,9 +172,6 @@ export default function GithubConfigPage() {
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Token de acesso pessoal</label>
               <input name="token" type="password" required placeholder="github_pat_..." className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
-              <p className="text-xs text-neutral-400 mt-1">
-                .
-              </p>
             </div>
             <button
               type="submit"

@@ -87,6 +87,51 @@ export function limparTudo() {
   window.dispatchEvent(new CustomEvent("calculadora-db-changed"));
 }
 
+// ---------- Exclusões em cascata (uso dentro de mutateDb) ----------
+// Excluem o registro e tudo que depende diretamente dele, pra não deixar
+// dado "órfão" no sistema. Isso é uma exclusão definitiva — diferente do
+// fluxo de "formulário de saída", que é só um registro de negócio.
+
+export function excluirProjeto(db: Database, projetoId: string) {
+  const ciclosDoProjeto = db.ciclosAvaliacao.filter((c) => c.projetoId === projetoId).map((c) => c.id);
+  db.respostasAtivas = db.respostasAtivas.filter((r) => !ciclosDoProjeto.includes(r.cicloId));
+  db.respostasPassivas = db.respostasPassivas.filter((r) => !ciclosDoProjeto.includes(r.cicloId));
+  db.pontuacoesCategoria = db.pontuacoesCategoria.filter((p) => !ciclosDoProjeto.includes(p.cicloId));
+  db.registrosMeta = db.registrosMeta.filter((r) => !ciclosDoProjeto.includes(r.cicloId));
+  db.riscosChurn = db.riscosChurn.filter((r) => r.projetoId !== projetoId);
+  db.ciclosAvaliacao = db.ciclosAvaliacao.filter((c) => c.projetoId !== projetoId);
+  db.configuracoesCiclo = db.configuracoesCiclo.filter((c) => c.projetoId !== projetoId);
+  db.acessosProjeto = db.acessosProjeto.filter((a) => a.projetoId !== projetoId);
+  db.indicadoresDesempenho = db.indicadoresDesempenho.filter((i) => i.projetoId !== projetoId);
+  db.eventosCliente = db.eventosCliente.map((e) => (e.projetoId === projetoId ? { ...e, projetoId: null } : e));
+  db.projetos = db.projetos.filter((p) => p.id !== projetoId);
+}
+
+export function excluirCliente(db: Database, clienteId: string) {
+  const projetosDoCliente = db.projetos.filter((p) => p.clienteId === clienteId).map((p) => p.id);
+  for (const projetoId of projetosDoCliente) {
+    excluirProjeto(db, projetoId);
+  }
+  const metasDoCliente = db.metasCliente.filter((m) => m.clienteId === clienteId).map((m) => m.id);
+  db.registrosMeta = db.registrosMeta.filter((r) => !metasDoCliente.includes(r.metaClienteId));
+  db.metasCliente = db.metasCliente.filter((m) => m.clienteId !== clienteId);
+  db.contatosCliente = db.contatosCliente.filter((c) => c.clienteId !== clienteId);
+  db.eventosCliente = db.eventosCliente.filter((e) => e.clienteId !== clienteId);
+  db.perfisRisco = db.perfisRisco.filter((p) => p.clienteId !== clienteId);
+  db.formulariosSaida = db.formulariosSaida.filter((f) => f.clienteId !== clienteId);
+  db.clientes = db.clientes.filter((c) => c.id !== clienteId);
+}
+
+export function excluirUsuario(db: Database, usuarioId: string) {
+  db.acessosProjeto = db.acessosProjeto.filter((a) => a.usuarioId !== usuarioId);
+  db.projetos = db.projetos.map((p) => (p.csResponsavelId === usuarioId ? { ...p, csResponsavelId: null } : p));
+  db.usuarios = db.usuarios.filter((u) => u.id !== usuarioId);
+}
+
+export function excluirFormularioSaida(db: Database, formularioId: string) {
+  db.formulariosSaida = db.formulariosSaida.filter((f) => f.id !== formularioId);
+}
+
 // ---------- Seed inicial (mesmos dados de exemplo do seed.ts original) ----------
 
 export function garantirSeed() {

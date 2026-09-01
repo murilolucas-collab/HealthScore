@@ -13,10 +13,13 @@ export default function Sidebar() {
 
   const isAdmin = user.papel === "ADMIN";
   const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
-  const githubConfig = isAdmin ? getGithubConfig() : null;
+  const githubConfig = getGithubConfig();
 
   const projetos = db.projetos
     .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
+    // some projetos cujo cliente já foi encerrado (saída) — não ficam mais
+    // visíveis no dia a dia, só no histórico de "Motivos de Saída".
+    .filter((p) => db.clientes.find((c) => c.id === p.clienteId)?.status !== "INATIVO")
     .slice()
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
@@ -33,12 +36,12 @@ export default function Sidebar() {
           Dashboard
         </SidebarNavLink>
         <SidebarNavLink href="/projetos">Projetos</SidebarNavLink>
+        <SidebarNavLink href="/admin/github">Sincronização GitHub</SidebarNavLink>
         {isAdmin && (
           <>
             <SidebarNavLink href="/clientes">Clientes</SidebarNavLink>
             <SidebarNavLink href="/admin/usuarios">Usuários</SidebarNavLink>
             <SidebarNavLink href="/admin/saidas">Motivos de Saída</SidebarNavLink>
-            <SidebarNavLink href="/admin/github">Sincronização GitHub</SidebarNavLink>
           </>
         )}
 
@@ -57,12 +60,10 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-4 py-4 border-t border-neutral-200 text-sm">
-        {isAdmin && (
-          <div className="mb-2 flex items-center gap-1.5 text-xs text-neutral-400">
-            <span className={`inline-block w-1.5 h-1.5 rounded-full ${githubConfig ? "bg-emerald-500" : "bg-neutral-300"}`} />
-            {githubConfig ? `Sincronizado: ${githubConfig.owner}/${githubConfig.repo}` : "GitHub não conectado"}
-          </div>
-        )}
+        <div className="mb-2 flex items-center gap-1.5 text-xs text-neutral-400">
+          <span className={`inline-block w-1.5 h-1.5 rounded-full ${githubConfig ? "bg-emerald-500" : "bg-neutral-300"}`} />
+          {githubConfig ? `Sincronizado: ${githubConfig.owner}/${githubConfig.repo}` : "GitHub não conectado"}
+        </div>
         <div className="mb-2 text-neutral-700">
           {user.nome} <span className="block text-xs uppercase text-neutral-400">{user.papel}</span>
         </div>

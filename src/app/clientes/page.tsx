@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
+import { mutateDb, excluirCliente } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 
 const ORDEM = ["CRITICO", "ALTO", "MEDIO", "BAIXO"];
@@ -14,6 +15,14 @@ export default function ClientesPage() {
   if (!pronto || !db || !user) return null;
   if (user.papel !== "ADMIN") {
     return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
+  }
+
+  function handleExcluir(clienteId: string, nome: string) {
+    const confirmado = window.confirm(
+      `Excluir "${nome}" definitivamente? Isso apaga também todos os projetos, ciclos, respostas e histórico desse cliente. Não pode ser desfeito.`
+    );
+    if (!confirmado) return;
+    mutateDb((dbW) => excluirCliente(dbW, clienteId));
   }
 
   const clientes = db.clientes
@@ -44,20 +53,24 @@ export default function ClientesPage() {
 
       <div className="grid gap-3">
         {clientes.map(({ cliente, projetosCount, destaque }) => (
-          <Link key={cliente.id} href={`/clientes/detalhe?id=${cliente.id}`}>
-            <Card className="hover:border-neutral-400 transition flex items-center justify-between">
-              <div>
-                <div className="font-medium text-neutral-900">{cliente.nome}</div>
-                <div className="text-sm text-neutral-500">
-                  {cliente.segmento ?? "Sem segmento"} · {projetosCount} projeto(s)
-                </div>
+          <Card key={cliente.id} className="hover:border-neutral-400 transition flex items-center justify-between">
+            <Link href={`/clientes/detalhe?id=${cliente.id}`} className="flex-1 min-w-0">
+              <div className="font-medium text-neutral-900">{cliente.nome}</div>
+              <div className="text-sm text-neutral-500">
+                {cliente.segmento ?? "Sem segmento"} · {projetosCount} projeto(s)
               </div>
-              <div className="flex items-center gap-3">
-                <StatusBadge status={cliente.status} />
-                <RiscoBadge nivel={destaque} />
-              </div>
-            </Card>
-          </Link>
+            </Link>
+            <div className="flex items-center gap-3 shrink-0">
+              <StatusBadge status={cliente.status} />
+              <RiscoBadge nivel={destaque} />
+              <button
+                onClick={() => handleExcluir(cliente.id, cliente.nome)}
+                className="text-xs text-red-600 underline hover:text-red-800"
+              >
+                Excluir
+              </button>
+            </div>
+          </Card>
         ))}
         {clientes.length === 0 && <p className="text-sm text-neutral-500">Nenhum cliente cadastrado ainda.</p>}
       </div>

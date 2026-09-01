@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { mutateDb, novoId } from "@/lib/store";
+import { mutateDb, novoId, excluirCliente } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 import type { TipoEvento, StatusCliente } from "@/lib/types";
 
@@ -34,6 +34,7 @@ const MOTIVO_SAIDA_LABEL: Record<string, string> = {
 export default function ClienteDetalhePage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id") ?? "";
+  const router = useRouter();
   const { user, pronto } = useAuth();
   const db = useDb();
 
@@ -162,6 +163,18 @@ export default function ClienteDetalhePage() {
     });
   }
 
+  function handleExcluir() {
+    if (
+      !window.confirm(
+        `Excluir "${cliente.nome}" definitivamente? Isso apaga também todos os projetos, ciclos, respostas e histórico desse cliente. Não pode ser desfeito.`
+      )
+    ) {
+      return;
+    }
+    mutateDb((dbW) => excluirCliente(dbW, id));
+    router.push("/clientes");
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -202,6 +215,9 @@ export default function ClienteDetalhePage() {
         ) : (
           <span className="text-sm text-neutral-500">Cliente encerrado — veja o formulário de saída abaixo.</span>
         )}
+        <button onClick={handleExcluir} className="text-sm text-red-600 underline hover:text-red-800 ml-auto">
+          Excluir cliente definitivamente
+        </button>
       </div>
 
       {formularioSaida && responsavelSaida && (

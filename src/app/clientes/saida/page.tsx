@@ -126,7 +126,7 @@ export default function FormularioSaidaPage() {
 
           <label className="flex items-center gap-2 text-sm text-neutral-700">
             <input type="checkbox" name="poderiaSerEvitado" />
-            Essa saída poderia ter sido evitada pela agência
+            Essa saída poderia ter sido evitada pela agência?
           </label>
 
           <button type="submit" className="bg-red-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-red-700">

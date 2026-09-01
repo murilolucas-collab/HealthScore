@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth, getProjetoIdsDoUsuario } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
+import { mutateDb, excluirProjeto } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 
 export default function ProjetosPage() {
@@ -23,9 +24,17 @@ export default function ProjetosPage() {
         .filter((r) => r.projetoId === p.id)
         .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0],
     }))
-    .filter((p) => p.cliente)
+    .filter((p) => p.cliente && p.cliente.status !== "INATIVO")
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
+  function handleExcluir(e: React.MouseEvent, projetoId: string, nome: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm(`Excluir o projeto "${nome}"? Isso remove todos os ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`)) {
+      return;
+    }
+    mutateDb((dbW) => excluirProjeto(dbW, projetoId));
+  }
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -48,6 +57,14 @@ export default function ProjetosPage() {
               <div className="flex items-center gap-3">
                 <StatusBadge status={p.status} />
                 <RiscoBadge nivel={p.riscoChurn?.nivelRisco} />
+                {isAdmin && (
+                  <button
+                    onClick={(e) => handleExcluir(e, p.id, p.nome)}
+                    className="text-xs text-red-600 underline hover:text-red-800"
+                  >
+                    Excluir
+                  </button>
+                )}
               </div>
             </Card>
           </Link>

@@ -32,7 +32,7 @@ export default function Home() {
         .filter((r) => r.projetoId === p.id)
         .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0],
     }))
-    .filter((p) => p.cliente)
+    .filter((p) => p.cliente && p.cliente.status !== "INATIVO")
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   const contagemPorNivel: Record<string, number> = { CRITICO: 0, ALTO: 0, MEDIO: 0, BAIXO: 0 };

@@ -16,7 +16,10 @@ export default function NovoProjetoPage() {
     return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
   }
 
-  const clientes = db.clientes.slice().sort((a, b) => a.nome.localeCompare(b.nome));
+  const clientes = db.clientes
+    .filter((c) => c.status !== "INATIVO")
+    .slice()
+    .sort((a, b) => a.nome.localeCompare(b.nome));
   const usuarios = db.usuarios.slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

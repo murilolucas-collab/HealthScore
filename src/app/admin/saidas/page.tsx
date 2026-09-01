@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
+import { mutateDb, excluirFormularioSaida } from "@/lib/store";
 import { Card } from "@/components/ui";
 
 const MOTIVO_LABEL: Record<string, string> = {
@@ -45,6 +46,24 @@ export default function MotivosSaidaPage() {
   }
   const motivosOrdenados = Array.from(contagemPorMotivo.entries()).sort((a, b) => b[1] - a[1]);
   const maiorContagem = motivosOrdenados[0]?.[1] ?? 1;
+
+  function handleExcluir(formularioId: string, clienteId: string, clienteNome?: string) {
+    if (
+      !window.confirm(
+        `Excluir o registro de saída de "${clienteNome ?? "cliente"}"? Isso reativa o cliente (volta a aparecer normalmente no sistema). Essa ação não pode ser desfeita.`
+      )
+    ) {
+      return;
+    }
+    mutateDb((dbW) => {
+      excluirFormularioSaida(dbW, formularioId);
+      const aindaTemOutraSaida = dbW.formulariosSaida.some((f) => f.clienteId === clienteId);
+      if (!aindaTemOutraSaida) {
+        const c = dbW.clientes.find((cl) => cl.id === clienteId);
+        if (c) c.status = "ATIVO";
+      }
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -90,7 +109,15 @@ export default function MotivosSaidaPage() {
                 {s.poderiaSerEvitado && <span className="ml-2 text-xs text-red-600 font-medium">EVITÁVEL</span>}
               </p>
               <p className="text-sm text-neutral-500">{s.detalhamento}</p>
-              <p className="text-xs text-neutral-400 mt-1">Registrado por {s.responsavel?.nome}</p>
+              <p className="text-xs text-neutral-400 mt-1 flex items-center justify-between">
+                <span>Registrado por {s.responsavel?.nome}</span>
+                <button
+                  onClick={() => handleExcluir(s.id, s.clienteId, s.cliente?.nome)}
+                  className="text-red-600 underline hover:text-red-800 normal-case"
+                >
+                  Excluir registro
+                </button>
+              </p>
             </div>
           ))}
           {saidas.length === 0 && <p className="text-sm text-neutral-500">Nenhum registro ainda.</p>}

@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth, podeAcessarProjeto } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { mutateDb, novoId } from "@/lib/store";
+import { mutateDb, novoId, excluirProjeto } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 import type { Periodicidade } from "@/lib/types";
 
@@ -21,6 +21,7 @@ const PERIODOS_EM_DIAS: Record<string, number> = {
 export default function ProjetoDetalhePage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id") ?? "";
+  const router = useRouter();
   const { user, pronto } = useAuth();
   const db = useDb();
 
@@ -128,6 +129,18 @@ export default function ProjetoDetalhePage() {
     });
   }
 
+  function handleExcluir() {
+    if (
+      !window.confirm(
+        `Excluir o projeto "${projeto.nome}"? Isso remove todos os ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`
+      )
+    ) {
+      return;
+    }
+    mutateDb((dbW) => excluirProjeto(dbW, id));
+    router.push("/projetos");
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -142,7 +155,14 @@ export default function ProjetoDetalhePage() {
             {csResponsavel && ` · CS: ${csResponsavel.nome}`}
           </p>
         </div>
-        <StatusBadge status={projeto.status} />
+        <div className="flex items-center gap-3">
+          <StatusBadge status={projeto.status} />
+          {isAdmin && (
+            <button onClick={handleExcluir} className="text-sm text-red-600 underline hover:text-red-800">
+              Excluir projeto
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
