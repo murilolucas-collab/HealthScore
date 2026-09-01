@@ -61,15 +61,6 @@
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
-      "id": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
-      "nome": "Grupo Comércio Geral",
-      "cnpj": null,
-      "segmento": "Varejo",
-      "inicioContrato": "2026-06-01",
-      "status": "INATIVO",
-      "criadoEm": "2026-08-29T02:43:59.279Z"
-    },
-    {
       "id": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
       "nome": "VUPT Mobilidade",
       "cnpj": null,
@@ -110,17 +101,6 @@
       "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataSaida": "2026-08-29T02:52:42.651Z",
       "criadoEm": "2026-08-29T02:52:42.651Z"
-    },
-    {
-      "id": "saida_6de38b24-3e34-4efe-8bce-528ff4d1e323",
-      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
-      "motivoPrincipal": "ATENDIMENTO_COMUNICACAO",
-      "detalhamento": "123123",
-      "poderiaSerEvitado": false,
-      "notaSatisfacaoGeral": 2,
-      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
-      "dataSaida": "2026-08-31T12:26:39.509Z",
-      "criadoEm": "2026-08-31T12:26:39.509Z"
     },
     {
       "id": "saida_f60dfd1f-1bcc-453d-af5a-008fe58fabcf",
@@ -189,16 +169,6 @@
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
-      "id": "contato_90cf37e3-39bb-43b9-8a2e-324bef949ff0",
-      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
-      "nome": "Bruno Lima",
-      "cargo": null,
-      "email": "bruno@comerciogeral.com",
-      "telefone": null,
-      "principal": true,
-      "criadoEm": "2026-08-29T02:43:59.279Z"
-    },
-    {
       "id": "contato_b01d1b8f-8a0e-43c3-98ce-6851b8bf8ffd",
       "clienteId": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
       "nome": "Fernanda Costa",
@@ -246,13 +216,6 @@
       "atualizadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
-      "id": "perfil_0dfabe10-e8fa-4e0a-9f31-d21b1190cabc",
-      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
-      "propensaoRisco": 0,
-      "tendencia": "ESTAVEL",
-      "atualizadoEm": "2026-08-29T02:43:59.279Z"
-    },
-    {
       "id": "perfil_8d75f6bc-2889-40b8-95e8-dbdaf68210bb",
       "clienteId": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
       "propensaoRisco": 0,
@@ -294,15 +257,6 @@
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
-      "id": "projeto_8d54e972-c475-45cc-b949-b659e814cf4a",
-      "nome": "Marketing Geral",
-      "clienteId": "cliente_cf5266c1-c2e7-488a-a352-89d982252f13",
-      "dataInicio": "2026-06-01",
-      "status": "ATIVO",
-      "csResponsavelId": null,
-      "criadoEm": "2026-08-29T02:43:59.279Z"
-    },
-    {
       "id": "projeto_ced8b574-8ae3-4d74-ae18-e5859a8f3b8a",
       "nome": "VUPT ADS",
       "clienteId": "cliente_b2418e7d-5d00-47b4-84a9-e10cb6336f42",
@@ -332,13 +286,6 @@
     {
       "id": "config_3eabed41-a369-43d0-8fe5-90d5f4d3975e",
       "projetoId": "projeto_0d93f7bd-8482-4c51-bdb0-cddf9bce6609",
-      "periodicidade": "MENSAL",
-      "diaDisparo": 1,
-      "ativo": true
-    },
-    {
-      "id": "config_95e59237-8608-4323-927b-6271dbef24e7",
-      "projetoId": "projeto_8d54e972-c475-45cc-b949-b659e814cf4a",
       "periodicidade": "MENSAL",
       "diaDisparo": 1,
       "ativo": true
