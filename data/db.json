@@ -9,22 +9,6 @@
       "criadoEm": "2026-08-29T02:43:59.279Z"
     },
     {
-      "id": "usuario_8d1ab887-aee4-43ee-9690-18eda92cc53e",
-      "nome": "Ana CS",
-      "email": "cs@agencia.com",
-      "senhaHash": "$2b$10$t/QgbH1wGa8Zsb3BRNMvEe8n/L9CIIsXZ8VMaUf/lm8.Kkwb62BdS",
-      "papel": "PADRAO",
-      "criadoEm": "2026-08-29T02:43:59.279Z"
-    },
-    {
-      "id": "usuario_9f26b1d0-5814-42bc-ad33-f77705384adf",
-      "nome": "CSTeste",
-      "email": "csteste@agencia.com",
-      "senhaHash": "$2b$10$H.xDeuBfLLqy.GB5Bd3KOODZ9PvjuR0TP2RnSFsSCzC71tLGt9XHG",
-      "papel": "PADRAO",
-      "criadoEm": "2026-08-31T12:24:22.146Z"
-    },
-    {
       "id": "usuario_77c23379-18af-4c40-8508-98ecb8a72f0f",
       "nome": "teste123",
       "email": "teste123@123.com",
