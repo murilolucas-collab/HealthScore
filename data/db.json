@@ -23,6 +23,12 @@
       "usuarioId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "projetoId": "projeto_58e38a91-5927-42ef-a41a-7cd9e7a64e84",
       "criadoEm": "2026-09-01T22:26:44.847Z"
+    },
+    {
+      "id": "acesso_6ea10494-f602-4a89-981e-31c80d6c0b27",
+      "usuarioId": "usuario_77c23379-18af-4c40-8508-98ecb8a72f0f",
+      "projetoId": "projeto_58e38a91-5927-42ef-a41a-7cd9e7a64e84",
+      "criadoEm": "2026-09-01T22:26:54.665Z"
     }
   ],
   "clientes": [
