@@ -18,54 +18,13 @@
     }
   ],
   "acessosProjeto": [],
-  "clientes": [
-    {
-      "id": "cliente_496a6dd5-2b74-43db-8f4b-2207fe70bbca",
-      "nome": "CSTeste",
-      "cnpj": "1231",
-      "segmento": "123",
-      "inicioContrato": "2026-09-08",
-      "status": "INATIVO",
-      "criadoEm": "2026-09-01T22:26:22.860Z"
-    }
-  ],
+  "clientes": [],
   "metasCliente": [],
   "registrosMeta": [],
-  "formulariosSaida": [
-    {
-      "id": "saida_a715508f-d074-4cd9-b55a-bd68282d6d20",
-      "clienteId": "cliente_496a6dd5-2b74-43db-8f4b-2207fe70bbca",
-      "motivoPrincipal": "PRECO",
-      "detalhamento": "caro",
-      "poderiaSerEvitado": true,
-      "notaSatisfacaoGeral": 6,
-      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
-      "dataSaida": "2026-09-01T22:34:08.714Z",
-      "criadoEm": "2026-09-01T22:34:08.714Z"
-    }
-  ],
-  "contatosCliente": [
-    {
-      "id": "contato_494feddc-82a7-4156-8c5d-7c843d23c15d",
-      "clienteId": "cliente_496a6dd5-2b74-43db-8f4b-2207fe70bbca",
-      "nome": "123",
-      "email": "murilolucas@3pontoscompany.com.br",
-      "cargo": "123",
-      "telefone": null,
-      "principal": true,
-      "criadoEm": "2026-09-01T22:26:22.860Z"
-    }
-  ],
+  "formulariosSaida": [],
+  "contatosCliente": [],
   "eventosCliente": [],
-  "perfisRisco": [
-    {
-      "id": "perfil_eae6f80b-fa53-477a-a157-6e92aa43aa35",
-      "clienteId": "cliente_496a6dd5-2b74-43db-8f4b-2207fe70bbca",
-      "propensaoRisco": 0,
-      "tendencia": "ESTAVEL",
-      "atualizadoEm": "2026-09-01T22:26:22.860Z"
-    }
-  ],
+  "perfisRisco": [],
   "projetos": [
     {
       "id": "projeto_4beaad3f-b1b6-4c6f-9ff6-30ad9ad81173",
