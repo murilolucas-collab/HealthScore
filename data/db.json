@@ -37,7 +37,17 @@
       "criadoEm": "2026-09-05T02:44:17.435Z"
     }
   ],
-  "metasCliente": [],
+  "metasCliente": [
+    {
+      "id": "meta_4edf12b7-365c-4c13-8894-8ff39e9722d4",
+      "clienteId": "cliente_388c30a4-c62c-488e-8837-df60b4f63aef",
+      "nome": "Campanhas",
+      "valorAlvo": 600,
+      "unidade": "1",
+      "ativa": true,
+      "criadoEm": "2026-09-05T02:45:06.606Z"
+    }
+  ],
   "registrosMeta": [],
   "formulariosSaida": [],
   "contatosCliente": [
