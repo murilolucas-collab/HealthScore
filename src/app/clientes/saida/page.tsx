@@ -39,10 +39,8 @@ export default function FormularioSaidaPage() {
   if (!pronto || !db || !user) return null;
   if (!cliente) return <p className="text-sm text-neutral-500">Cliente não encontrado.</p>;
 
-  const projetosDoCliente = db.projetos.filter((p) => p.clienteId === id);
-  if (user.papel !== "ADMIN") {
-    const temAcesso = projetosDoCliente.some((p) => podeAcessarProjeto(user, p.id));
-    if (!temAcesso) return <p className="text-sm text-neutral-500">Cliente não encontrado.</p>;
+  if (user.papel !== "ADMIN" && !podeAcessarProjeto(user, cliente.projetoId)) {
+    return <p className="text-sm text-neutral-500">Cliente não encontrado.</p>;
   }
 
   if (clienteEncerrado) return null;

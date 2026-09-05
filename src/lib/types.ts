@@ -60,6 +60,7 @@ export interface AcessoProjeto {
 
 export interface Cliente {
   id: string;
+  projetoId: string;
   nome: string;
   cnpj: string | null;
   segmento: string | null;
@@ -131,7 +132,6 @@ export interface PerfilRiscoCliente {
 export interface Projeto {
   id: string;
   nome: string;
-  clienteId: string;
   dataInicio: string | null;
   status: StatusProjeto;
   csResponsavelId: string | null;
@@ -180,6 +180,7 @@ export interface RespostaAtiva {
 export interface RespostaPassiva {
   id: string;
   cicloId: string;
+  clienteId: string;
   perguntaId: string;
   csUsuarioId: string;
   nota: number;
@@ -190,6 +191,7 @@ export interface RespostaPassiva {
 export interface PontuacaoCategoria {
   id: string;
   cicloId: string;
+  clienteId: string;
   polo: Polo;
   categoria: string;
   mediaNota: number;

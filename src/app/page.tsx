@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useAuth, getProjetoIdsDoUsuario } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { Card, StatusBadge, RiscoBadge, CategoriaLabel } from "@/components/ui";
+import type { NivelRisco } from "@/lib/types";
 
-const ORDEM_RISCO = ["CRITICO", "ALTO", "MEDIO", "BAIXO"] as const;
+const ORDEM_RISCO: NivelRisco[] = ["CRITICO", "ALTO", "MEDIO", "BAIXO"];
 
 function corBarra(mediaNota: number) {
   if (mediaNota >= 8) return "bg-emerald-400";
@@ -22,45 +23,64 @@ export default function Home() {
   const isAdmin = user.papel === "ADMIN";
   const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
 
-  const projetos = db.projetos
-    .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
-    .map((p) => ({
-      ...p,
-      cliente: db.clientes.find((c) => c.id === p.clienteId)!,
-      csResponsavel: db.usuarios.find((u) => u.id === p.csResponsavelId) ?? null,
+  const projetosVisiveis = db.projetos.filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)));
+  const projetoIdsVisiveis = new Set(projetosVisiveis.map((p) => p.id));
+
+  const clientes = db.clientes
+    .filter((c) => projetoIdsVisiveis.has(c.projetoId) && c.status !== "INATIVO")
+    .map((c) => ({
+      ...c,
+      projeto: db.projetos.find((p) => p.id === c.projetoId),
       riscoChurn: db.riscosChurn
-        .filter((r) => r.projetoId === p.id)
+        .filter((r) => r.clienteId === c.id)
         .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0],
-    }))
-    .filter((p) => p.cliente && p.cliente.status !== "INATIVO")
-    .sort((a, b) => a.nome.localeCompare(b.nome));
+    }));
 
   const contagemPorNivel: Record<string, number> = { CRITICO: 0, ALTO: 0, MEDIO: 0, BAIXO: 0 };
-  for (const p of projetos) {
-    const nivel = p.riscoChurn?.nivelRisco;
+  for (const c of clientes) {
+    const nivel = c.riscoChurn?.nivelRisco;
     if (nivel) contagemPorNivel[nivel]++;
   }
 
-  const porCliente = new Map<string, { cliente: (typeof projetos)[number]["cliente"]; projetos: typeof projetos }>();
-  for (const p of projetos) {
-    const entry = porCliente.get(p.clienteId) ?? { cliente: p.cliente, projetos: [] };
-    entry.projetos.push(p);
-    porCliente.set(p.clienteId, entry);
-  }
+  const pesoOrdem: Record<string, number> = { CRITICO: 0, ALTO: 1, MEDIO: 2, BAIXO: 3 };
+  const clientesEmDestaque = clientes
+    .filter((c) => c.riscoChurn)
+    .sort((a, b) => (pesoOrdem[a.riscoChurn!.nivelRisco] ?? 9) - (pesoOrdem[b.riscoChurn!.nivelRisco] ?? 9))
+    .slice(0, 10);
 
-  const porCS = new Map<string, { nome: string; projetos: typeof projetos }>();
+  const projetosComResumo = projetosVisiveis
+    .map((p) => {
+      const clientesDoProjeto = clientes.filter((c) => c.projetoId === p.id);
+      const contagem: Record<string, number> = { CRITICO: 0, ALTO: 0, MEDIO: 0, BAIXO: 0 };
+      for (const c of clientesDoProjeto) {
+        const nivel = c.riscoChurn?.nivelRisco;
+        if (nivel) contagem[nivel]++;
+      }
+      return {
+        ...p,
+        csResponsavel: db.usuarios.find((u) => u.id === p.csResponsavelId) ?? null,
+        totalClientes: clientesDoProjeto.length,
+        contagem,
+      };
+    })
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+
+  const porCS = new Map<string, { nome: string; totalClientes: number; contagem: Record<string, number> }>();
   if (isAdmin) {
-    for (const p of projetos) {
+    for (const p of projetosComResumo) {
       const chave = p.csResponsavelId ?? "sem-cs";
       const nome = p.csResponsavel?.nome ?? "Sem CS responsável";
-      const entry = porCS.get(chave) ?? { nome, projetos: [] };
-      entry.projetos.push(p);
+      const entry = porCS.get(chave) ?? { nome, totalClientes: 0, contagem: { CRITICO: 0, ALTO: 0, MEDIO: 0, BAIXO: 0 } };
+      entry.totalClientes += p.totalClientes;
+      for (const nivel of ORDEM_RISCO) entry.contagem[nivel] += p.contagem[nivel];
       porCS.set(chave, entry);
     }
   }
 
-  const cicloIdsRecentes = projetos.map((p) => p.riscoChurn?.cicloId).filter((id): id is string => !!id);
-  const pontuacoes = db.pontuacoesCategoria.filter((p) => cicloIdsRecentes.includes(p.cicloId));
+  const cicloClientePares = new Set(
+    clientes.filter((c) => c.riscoChurn).map((c) => `${c.riscoChurn!.cicloId}::${c.id}`)
+  );
+  const pontuacoes = db.pontuacoesCategoria.filter((p) => cicloClientePares.has(`${p.cicloId}::${p.clienteId}`));
 
   function mediaPorCategoria(polo: "ATIVO" | "PASSIVO") {
     const grupos = new Map<string, number[]>();
@@ -96,7 +116,7 @@ export default function Home() {
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-medium text-neutral-900">Risco por cliente</h2>
+            <h2 className="font-medium text-neutral-900">Clientes em maior risco</h2>
             {isAdmin && (
               <Link href="/clientes" className="text-xs underline text-neutral-500 hover:text-neutral-900">
                 ver todos
@@ -104,24 +124,22 @@ export default function Home() {
             )}
           </div>
           <div className="space-y-2">
-            {Array.from(porCliente.values()).map(({ cliente, projetos: projs }) => {
-              const niveis = projs.map((p) => p.riscoChurn?.nivelRisco).filter(Boolean);
-              const pior = ORDEM_RISCO.find((n) => niveis.includes(n as never));
-              return (
-                <Link
-                  key={cliente.id}
-                  href={isAdmin ? `/clientes/detalhe?id=${cliente.id}` : "#"}
-                  className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400"
-                >
-                  <div>
-                    <div className="text-sm text-neutral-800">{cliente.nome}</div>
-                    <div className="text-xs text-neutral-500">{projs.length} projeto(s)</div>
-                  </div>
-                  <RiscoBadge nivel={pior} />
-                </Link>
-              );
-            })}
-            {porCliente.size === 0 && <p className="text-sm text-neutral-500">Nenhum cliente disponível.</p>}
+            {clientesEmDestaque.map((c) => (
+              <Link
+                key={c.id}
+                href={isAdmin ? `/clientes/detalhe?id=${c.id}` : "#"}
+                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400"
+              >
+                <div>
+                  <div className="text-sm text-neutral-800">{c.nome}</div>
+                  <div className="text-xs text-neutral-500">{c.projeto?.nome ?? "—"}</div>
+                </div>
+                <RiscoBadge nivel={c.riscoChurn?.nivelRisco} />
+              </Link>
+            ))}
+            {clientesEmDestaque.length === 0 && (
+              <p className="text-sm text-neutral-500">Nenhum risco calculado ainda.</p>
+            )}
           </div>
         </Card>
 
@@ -133,29 +151,27 @@ export default function Home() {
             </Link>
           </div>
           <div className="space-y-2">
-            {projetos.map((p) => {
-              const risco = p.riscoChurn;
-              return (
-                <Link
-                  key={p.id}
-                  href={`/projetos/detalhe?id=${p.id}`}
-                  className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400"
-                >
-                  <div>
-                    <div className="text-sm text-neutral-800">{p.nome}</div>
-                    <div className="text-xs text-neutral-500">
-                      {p.cliente.nome}
-                      {risco && ` · saúde ${risco.scoreSaudeGeral.toFixed(1)}`}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <StatusBadge status={p.status} />
-                    <RiscoBadge nivel={risco?.nivelRisco} />
-                  </div>
-                </Link>
-              );
-            })}
-            {projetos.length === 0 && <p className="text-sm text-neutral-500">Nenhum projeto disponível.</p>}
+            {projetosComResumo.map((p) => (
+              <Link
+                key={p.id}
+                href={`/projetos/detalhe?id=${p.id}`}
+                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400"
+              >
+                <div>
+                  <div className="text-sm text-neutral-800">{p.nome}</div>
+                  <div className="text-xs text-neutral-500">{p.totalClientes} cliente(s) ativo(s)</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={p.status} />
+                  {ORDEM_RISCO.filter((n) => p.contagem[n] > 0).map((n) => (
+                    <span key={n} className="text-xs text-neutral-500">
+                      {p.contagem[n]} <RiscoBadge nivel={n} />
+                    </span>
+                  ))}
+                </div>
+              </Link>
+            ))}
+            {projetosComResumo.length === 0 && <p className="text-sm text-neutral-500">Nenhum projeto disponível.</p>}
           </div>
         </Card>
       </div>
@@ -166,20 +182,22 @@ export default function Home() {
           <div className="space-y-2">
             {Array.from(porCS.values())
               .sort((a, b) => a.nome.localeCompare(b.nome))
-              .map(({ nome, projetos: projs }) => {
-                const niveis = projs.map((p) => p.riscoChurn?.nivelRisco).filter(Boolean);
-                const pior = ORDEM_RISCO.find((n) => niveis.includes(n as never));
-                return (
-                  <div key={nome} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2">
-                    <div>
-                      <div className="text-sm text-neutral-800">{nome}</div>
-                      <div className="text-xs text-neutral-500">{projs.length} projeto(s)</div>
-                    </div>
-                    <RiscoBadge nivel={pior} />
+              .map(({ nome, totalClientes, contagem }) => (
+                <div key={nome} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2">
+                  <div>
+                    <div className="text-sm text-neutral-800">{nome}</div>
+                    <div className="text-xs text-neutral-500">{totalClientes} cliente(s)</div>
                   </div>
-                );
-              })}
-            {porCS.size === 0 && <p className="text-sm text-neutral-500">Nenhum projeto com risco calculado ainda.</p>}
+                  <div className="flex items-center gap-2">
+                    {ORDEM_RISCO.filter((n) => contagem[n] > 0).map((n) => (
+                      <span key={n} className="text-xs text-neutral-500">
+                        {contagem[n]} <RiscoBadge nivel={n} />
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            {porCS.size === 0 && <p className="text-sm text-neutral-500">Nenhum cliente com risco calculado ainda.</p>}
           </div>
         </Card>
       )}
@@ -188,7 +206,7 @@ export default function Home() {
         <Card>
           <h2 className="font-medium text-neutral-900 mb-1">Nota média por categoria (NPS)</h2>
           <p className="text-xs text-neutral-500 mb-4">
-            Média do último ciclo calculado de cada projeto — atendimento, arte e tráfego.
+            Média do último ciclo calculado de cada cliente — atendimento, arte e tráfego.
           </p>
           {categoriasAtivas.length > 0 ? (
             <div className="space-y-2">

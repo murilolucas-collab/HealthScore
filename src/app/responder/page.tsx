@@ -36,11 +36,11 @@ export default function ResponderPesquisaPage() {
   if (!db) return null;
 
   const ciclo = db.ciclosAvaliacao.find((c) => c.id === cicloId);
-  const projeto = ciclo ? db.projetos.find((p) => p.id === ciclo.projetoId) : undefined;
-  const cliente = projeto ? db.clientes.find((c) => c.id === projeto.clienteId) : undefined;
   const contato = db.contatosCliente.find((c) => c.id === contatoId);
+  const cliente = contato ? db.clientes.find((c) => c.id === contato.clienteId) : undefined;
+  const projeto = cliente ? db.projetos.find((p) => p.id === cliente.projetoId) : undefined;
 
-  const linkValido = !!ciclo && !!projeto && !!cliente && !!contato && contato.clienteId === cliente.id;
+  const linkValido = !!ciclo && !!projeto && !!cliente && !!contato && ciclo.projetoId === projeto.id;
 
   if (!linkValido) {
     return (

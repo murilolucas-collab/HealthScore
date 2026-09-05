@@ -93,11 +93,16 @@ export function limparTudo() {
 // fluxo de "formulário de saída", que é só um registro de negócio.
 
 export function excluirProjeto(db: Database, projetoId: string) {
+  const clientesDoProjeto = db.clientes.filter((c) => c.projetoId === projetoId).map((c) => c.id);
+  for (const clienteId of clientesDoProjeto) {
+    excluirDadosDoCliente(db, clienteId);
+  }
+  db.clientes = db.clientes.filter((c) => c.projetoId !== projetoId);
+
   const ciclosDoProjeto = db.ciclosAvaliacao.filter((c) => c.projetoId === projetoId).map((c) => c.id);
   db.respostasAtivas = db.respostasAtivas.filter((r) => !ciclosDoProjeto.includes(r.cicloId));
   db.respostasPassivas = db.respostasPassivas.filter((r) => !ciclosDoProjeto.includes(r.cicloId));
   db.pontuacoesCategoria = db.pontuacoesCategoria.filter((p) => !ciclosDoProjeto.includes(p.cicloId));
-  db.registrosMeta = db.registrosMeta.filter((r) => !ciclosDoProjeto.includes(r.cicloId));
   db.riscosChurn = db.riscosChurn.filter((r) => r.projetoId !== projetoId);
   db.ciclosAvaliacao = db.ciclosAvaliacao.filter((c) => c.projetoId !== projetoId);
   db.configuracoesCiclo = db.configuracoesCiclo.filter((c) => c.projetoId !== projetoId);
@@ -107,18 +112,28 @@ export function excluirProjeto(db: Database, projetoId: string) {
   db.projetos = db.projetos.filter((p) => p.id !== projetoId);
 }
 
-export function excluirCliente(db: Database, clienteId: string) {
-  const projetosDoCliente = db.projetos.filter((p) => p.clienteId === clienteId).map((p) => p.id);
-  for (const projetoId of projetosDoCliente) {
-    excluirProjeto(db, projetoId);
-  }
+// Remove tudo ligado a um cliente (respostas, contatos, metas, risco...) mas
+// NÃO mexe no projeto — usado tanto por excluirCliente (projeto continua)
+// quanto por excluirProjeto (que já cuida do projeto separadamente).
+function excluirDadosDoCliente(db: Database, clienteId: string) {
+  const contatosDoCliente = db.contatosCliente.filter((c) => c.clienteId === clienteId).map((c) => c.id);
+  db.respostasAtivas = db.respostasAtivas.filter((r) => !contatosDoCliente.includes(r.contatoClienteId));
+  db.respostasPassivas = db.respostasPassivas.filter((r) => r.clienteId !== clienteId);
+  db.pontuacoesCategoria = db.pontuacoesCategoria.filter((p) => p.clienteId !== clienteId);
+  db.riscosChurn = db.riscosChurn.filter((r) => r.clienteId !== clienteId);
+
   const metasDoCliente = db.metasCliente.filter((m) => m.clienteId === clienteId).map((m) => m.id);
   db.registrosMeta = db.registrosMeta.filter((r) => !metasDoCliente.includes(r.metaClienteId));
   db.metasCliente = db.metasCliente.filter((m) => m.clienteId !== clienteId);
+
   db.contatosCliente = db.contatosCliente.filter((c) => c.clienteId !== clienteId);
   db.eventosCliente = db.eventosCliente.filter((e) => e.clienteId !== clienteId);
   db.perfisRisco = db.perfisRisco.filter((p) => p.clienteId !== clienteId);
   db.formulariosSaida = db.formulariosSaida.filter((f) => f.clienteId !== clienteId);
+}
+
+export function excluirCliente(db: Database, clienteId: string) {
+  excluirDadosDoCliente(db, clienteId);
   db.clientes = db.clientes.filter((c) => c.id !== clienteId);
 }
 
@@ -177,6 +192,7 @@ export function garantirSeed() {
 
   const cliente = {
     id: novoId("cliente"),
+    projetoId: "",
     nome: "Loja Exemplo Ltda",
     cnpj: null,
     segmento: "E-commerce",
@@ -184,6 +200,16 @@ export function garantirSeed() {
     status: "ATIVO" as const,
     criadoEm: agora,
   };
+
+  const projeto = {
+    id: novoId("projeto"),
+    nome: "Gestão de Marketing 360",
+    dataInicio: "2025-01-15",
+    status: "ATIVO" as const,
+    csResponsavelId: cs.id,
+    criadoEm: agora,
+  };
+  cliente.projetoId = projeto.id;
   db.clientes.push(cliente);
   db.contatosCliente.push({
     id: novoId("contato"),
@@ -203,15 +229,6 @@ export function garantirSeed() {
     atualizadoEm: agora,
   });
 
-  const projeto = {
-    id: novoId("projeto"),
-    nome: "Gestão de Marketing 360 - Loja Exemplo",
-    clienteId: cliente.id,
-    dataInicio: "2025-01-15",
-    status: "ATIVO" as const,
-    csResponsavelId: cs.id,
-    criadoEm: agora,
-  };
   db.projetos.push(projeto);
   db.configuracoesCiclo.push({
     id: novoId("config"),
@@ -228,44 +245,21 @@ export function garantirSeed() {
   });
 
   const PROJETOS_TESTE = [
-    { clienteNome: "Pharma Vida Saúde", segmento: "Saúde/Farma", contatoNome: "Renata Alves", contatoEmail: "renata@pharmavida.com", projetoNome: "Código Pharma", darAcessoCS: true },
-    { clienteNome: "Grupo Comércio Geral", segmento: "Varejo", contatoNome: "Bruno Lima", contatoEmail: "bruno@comerciogeral.com", projetoNome: "Marketing Geral", darAcessoCS: false },
-    { clienteNome: "VUPT Mobilidade", segmento: "Mobilidade/Transporte", contatoNome: "Fernanda Costa", contatoEmail: "fernanda@vupt.com", projetoNome: "VUPT ADS", darAcessoCS: false },
+    { projetoNome: "Código Pharma", darAcessoCS: true },
+    { projetoNome: "Marketing Geral", darAcessoCS: false },
+    { projetoNome: "VUPT ADS", darAcessoCS: false },
+  ];
+  const CLIENTES_TESTE = [
+    { clienteNome: "Pharma Vida Saúde", segmento: "Saúde/Farma", contatoNome: "Renata Alves", contatoEmail: "renata@pharmavida.com" },
+    { clienteNome: "Grupo Comércio Geral", segmento: "Varejo", contatoNome: "Bruno Lima", contatoEmail: "bruno@comerciogeral.com" },
+    { clienteNome: "VUPT Mobilidade", segmento: "Mobilidade/Transporte", contatoNome: "Fernanda Costa", contatoEmail: "fernanda@vupt.com" },
   ];
 
-  for (const p of PROJETOS_TESTE) {
-    const clienteTeste = {
-      id: novoId("cliente"),
-      nome: p.clienteNome,
-      cnpj: null,
-      segmento: p.segmento,
-      inicioContrato: "2026-06-01",
-      status: "ATIVO" as const,
-      criadoEm: agora,
-    };
-    db.clientes.push(clienteTeste);
-    db.contatosCliente.push({
-      id: novoId("contato"),
-      clienteId: clienteTeste.id,
-      nome: p.contatoNome,
-      cargo: null,
-      email: p.contatoEmail,
-      telefone: null,
-      principal: true,
-      criadoEm: agora,
-    });
-    db.perfisRisco.push({
-      id: novoId("perfil"),
-      clienteId: clienteTeste.id,
-      propensaoRisco: 0,
-      tendencia: "ESTAVEL",
-      atualizadoEm: agora,
-    });
-
+  PROJETOS_TESTE.forEach((p, i) => {
+    const c = CLIENTES_TESTE[i];
     const projetoTeste = {
       id: novoId("projeto"),
       nome: p.projetoNome,
-      clienteId: clienteTeste.id,
       dataInicio: "2026-06-01",
       status: "ATIVO" as const,
       csResponsavelId: p.darAcessoCS ? cs.id : null,
@@ -287,7 +281,36 @@ export function garantirSeed() {
         criadoEm: agora,
       });
     }
-  }
+
+    const clienteTeste = {
+      id: novoId("cliente"),
+      projetoId: projetoTeste.id,
+      nome: c.clienteNome,
+      cnpj: null,
+      segmento: c.segmento,
+      inicioContrato: "2026-06-01",
+      status: "ATIVO" as const,
+      criadoEm: agora,
+    };
+    db.clientes.push(clienteTeste);
+    db.contatosCliente.push({
+      id: novoId("contato"),
+      clienteId: clienteTeste.id,
+      nome: c.contatoNome,
+      cargo: null,
+      email: c.contatoEmail,
+      telefone: null,
+      principal: true,
+      criadoEm: agora,
+    });
+    db.perfisRisco.push({
+      id: novoId("perfil"),
+      clienteId: clienteTeste.id,
+      propensaoRisco: 0,
+      tendencia: "ESTAVEL",
+      atualizadoEm: agora,
+    });
+  });
 
   writeDb(db);
 }

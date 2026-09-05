@@ -48,14 +48,10 @@ export default function ClienteDetalhePage() {
 
   const contatos = db.contatosCliente.filter((c) => c.clienteId === id);
   const perfilRisco = db.perfisRisco.find((p) => p.clienteId === id);
-  const projetos = db.projetos
-    .filter((p) => p.clienteId === id)
-    .map((p) => ({
-      ...p,
-      riscoChurn: db.riscosChurn
-        .filter((r) => r.projetoId === p.id)
-        .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0],
-    }));
+  const projeto = db.projetos.find((p) => p.id === cliente.projetoId);
+  const riscoAtual = db.riscosChurn
+    .filter((r) => r.clienteId === id)
+    .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0];
   const eventos = db.eventosCliente
     .filter((e) => e.clienteId === id)
     .sort((a, b) => new Date(b.dataOcorrencia).getTime() - new Date(a.dataOcorrencia).getTime())
@@ -96,22 +92,15 @@ export default function ClienteDetalhePage() {
     const formData = new FormData(e.currentTarget);
     const tipo = String(formData.get("tipo") ?? "OUTRO") as TipoEvento;
     const descricao = String(formData.get("descricao") ?? "").trim();
-    const projetoId = String(formData.get("projetoId") ?? "") || null;
     if (!descricao) {
       alert("Descrição do evento é obrigatória");
       return;
-    }
-    if (user!.papel !== "ADMIN") {
-      if (!projetoId || !projetos.some((p) => p.id === projetoId)) {
-        alert("Sem acesso para registrar evento neste contexto");
-        return;
-      }
     }
     mutateDb((dbW) => {
       dbW.eventosCliente.push({
         id: novoId("evento"),
         clienteId: id,
-        projetoId,
+        projetoId: cliente!.projetoId,
         tipo,
         descricao,
         autorId: user!.id,
@@ -254,19 +243,15 @@ export default function ClienteDetalhePage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
-          <h2 className="font-medium text-neutral-900 mb-3">Projetos</h2>
-          <div className="space-y-2">
-            {projetos.map((p) => (
-              <Link key={p.id} href={`/projetos/detalhe?id=${p.id}`} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400">
-                <span className="text-sm text-neutral-800">{p.nome}</span>
-                <RiscoBadge nivel={p.riscoChurn?.nivelRisco} />
-              </Link>
-            ))}
-            {projetos.length === 0 && <p className="text-sm text-neutral-500">Nenhum projeto ainda.</p>}
-          </div>
-          <Link href="/projetos/novo" className="inline-block mt-3 text-sm text-neutral-600 underline hover:text-neutral-900">
-            + novo projeto
-          </Link>
+          <h2 className="font-medium text-neutral-900 mb-3">Projeto</h2>
+          {projeto ? (
+            <Link href={`/projetos/detalhe?id=${projeto.id}`} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400">
+              <span className="text-sm text-neutral-800">{projeto.nome}</span>
+              <RiscoBadge nivel={riscoAtual?.nivelRisco} />
+            </Link>
+          ) : (
+            <p className="text-sm text-neutral-500">Projeto não encontrado.</p>
+          )}
         </Card>
 
         <Card>
@@ -324,19 +309,11 @@ export default function ClienteDetalhePage() {
 
       <Card>
         <h2 className="font-medium text-neutral-900 mb-3">Histórico do cliente (reclamações, intervenções, ações de CS...)</h2>
-        <form onSubmit={handleEvento} className="grid md:grid-cols-4 gap-2 mb-4">
+        <form onSubmit={handleEvento} className="grid md:grid-cols-3 gap-2 mb-4">
           <select name="tipo" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
             {Object.entries(TIPO_EVENTO_LABEL).map(([valor, label]) => (
               <option key={valor} value={valor}>
                 {label}
-              </option>
-            ))}
-          </select>
-          <select name="projetoId" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="">
-            <option value="">Sem projeto específico</option>
-            {projetos.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nome}
               </option>
             ))}
           </select>

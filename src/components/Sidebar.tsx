@@ -17,9 +17,6 @@ export default function Sidebar() {
 
   const projetos = db.projetos
     .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
-    // some projetos cujo cliente já foi encerrado (saída) — não ficam mais
-    // visíveis no dia a dia, só no histórico de "Motivos de Saída".
-    .filter((p) => db.clientes.find((c) => c.id === p.clienteId)?.status !== "INATIVO")
     .slice()
     .sort((a, b) => a.nome.localeCompare(b.nome));
 

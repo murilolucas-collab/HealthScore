@@ -1,12 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth, podeAcessarProjeto } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { mutateDb, novoId, excluirProjeto } from "@/lib/store";
+import { mutateDb, novoId, excluirProjeto, excluirCliente } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 import type { Periodicidade } from "@/lib/types";
 
@@ -24,6 +25,7 @@ export default function ProjetoDetalhePage() {
   const router = useRouter();
   const { user, pronto } = useAuth();
   const db = useDb();
+  const [buscaCliente, setBuscaCliente] = useState("");
 
   if (!pronto || !db || !user) return null;
 
@@ -32,7 +34,6 @@ export default function ProjetoDetalhePage() {
   if (!podeAcessarProjeto(user, id)) return <p className="text-sm text-neutral-500">Sem acesso a este projeto.</p>;
 
   const isAdmin = user.papel === "ADMIN";
-  const cliente = db.clientes.find((c) => c.id === projeto.clienteId);
   const configuracaoCiclo = db.configuracoesCiclo.find((c) => c.projetoId === id);
   const csResponsavel = db.usuarios.find((u) => u.id === projeto.csResponsavelId);
   const acessos = db.acessosProjeto
@@ -41,13 +42,25 @@ export default function ProjetoDetalhePage() {
     .filter((a) => a.usuario);
   const ciclos = db.ciclosAvaliacao
     .filter((c) => c.projetoId === id)
-    .map((c) => ({ ...c, riscoChurn: db.riscosChurn.find((r) => r.cicloId === c.id) }))
     .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime());
   const indicadores = db.indicadoresDesempenho
     .filter((i) => i.projetoId === id)
     .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm))
     .slice(0, 10);
   const usuarios = isAdmin ? db.usuarios.slice().sort((a, b) => a.nome.localeCompare(b.nome)) : [];
+
+  const termoBusca = buscaCliente.trim().toLowerCase();
+  const clientes = db.clientes
+    .filter((c) => c.projetoId === id)
+    .filter((c) => (termoBusca ? c.nome.toLowerCase().includes(termoBusca) : true))
+    .map((c) => ({
+      ...c,
+      risco: db.riscosChurn
+        .filter((r) => r.clienteId === c.id)
+        .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0],
+    }))
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+  const totalClientes = db.clientes.filter((c) => c.projetoId === id).length;
 
   function handleConfigCiclo(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -129,10 +142,10 @@ export default function ProjetoDetalhePage() {
     });
   }
 
-  function handleExcluir() {
+  function handleExcluirProjeto() {
     if (
       !window.confirm(
-        `Excluir o projeto "${projeto!.nome}"? Isso remove todos os ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`
+        `Excluir o projeto "${projeto!.nome}"? Isso remove TODOS os clientes, ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`
       )
     ) {
       return;
@@ -141,33 +154,88 @@ export default function ProjetoDetalhePage() {
     router.push("/projetos");
   }
 
+  function handleExcluirCliente(clienteId: string, nome: string) {
+    if (
+      !window.confirm(
+        `Excluir "${nome}" definitivamente? Isso apaga também respostas, ciclos e histórico desse cliente (o projeto continua). Não pode ser desfeito.`
+      )
+    ) {
+      return;
+    }
+    mutateDb((dbW) => excluirCliente(dbW, clienteId));
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">{projeto.nome}</h1>
           <p className="text-sm text-neutral-500">
-            {cliente && (
-              <Link href={`/clientes/detalhe?id=${cliente.id}`} className="underline hover:text-neutral-900">
-                {cliente.nome}
-              </Link>
-            )}
+            {totalClientes} cliente{totalClientes === 1 ? "" : "s"}
             {csResponsavel && ` · CS: ${csResponsavel.nome}`}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <StatusBadge status={projeto.status} />
           {isAdmin && (
-            <button onClick={handleExcluir} className="text-sm text-red-600 underline hover:text-red-800">
+            <button onClick={handleExcluirProjeto} className="text-sm text-red-600 underline hover:text-red-800">
               Excluir projeto
             </button>
           )}
         </div>
       </div>
 
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-medium text-neutral-900">
+            Clientes <span className="text-sm font-normal text-neutral-400">({totalClientes})</span>
+          </h2>
+          {isAdmin && (
+            <Link href={`/clientes/novo?projetoId=${id}`} className="bg-neutral-900 text-white text-sm px-3 py-1.5 rounded-md hover:bg-neutral-800">
+              + Novo cliente
+            </Link>
+          )}
+        </div>
+        <input
+          value={buscaCliente}
+          onChange={(e) => setBuscaCliente(e.target.value)}
+          placeholder="Buscar cliente por nome..."
+          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm mb-3"
+        />
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {clientes.map((c) => (
+            <div key={c.id} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2">
+              <Link href={`/clientes/detalhe?id=${c.id}`} className="flex-1 min-w-0 hover:underline">
+                <span className="text-sm text-neutral-800">{c.nome}</span>
+              </Link>
+              <div className="flex items-center gap-3 shrink-0">
+                <StatusBadge status={c.status} />
+                <RiscoBadge nivel={c.risco?.nivelRisco} />
+                {isAdmin && (
+                  <button
+                    onClick={() => handleExcluirCliente(c.id, c.nome)}
+                    className="text-xs text-red-600 underline hover:text-red-800"
+                  >
+                    Excluir
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+          {clientes.length === 0 && (
+            <p className="text-sm text-neutral-500">
+              {totalClientes === 0 ? "Nenhum cliente neste projeto ainda." : "Nenhum cliente encontrado para essa busca."}
+            </p>
+          )}
+        </div>
+      </Card>
+
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <h2 className="font-medium text-neutral-900 mb-3">Ciclo de avaliação</h2>
+          <p className="text-xs text-neutral-500 mb-3">
+            Um ciclo cobre todos os clientes do projeto de uma vez — cada cliente tem seu próprio health score dentro dele.
+          </p>
           {isAdmin ? (
             <form onSubmit={handleConfigCiclo} className="flex flex-wrap items-end gap-2 mb-4">
               <div>
@@ -201,10 +269,7 @@ export default function ProjetoDetalhePage() {
                   {format(new Date(c.dataInicio), "dd/MM/yyyy", { locale: ptBR })}
                   {c.dataFim && ` – ${format(new Date(c.dataFim), "dd/MM/yyyy", { locale: ptBR })}`}
                 </div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={c.status} />
-                  <RiscoBadge nivel={c.riscoChurn?.nivelRisco} />
-                </div>
+                <StatusBadge status={c.status} />
               </Link>
             ))}
             {ciclos.length === 0 && <p className="text-sm text-neutral-500">Nenhum ciclo aberto ainda.</p>}

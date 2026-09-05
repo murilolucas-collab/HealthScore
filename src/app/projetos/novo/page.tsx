@@ -16,22 +16,17 @@ export default function NovoProjetoPage() {
     return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
   }
 
-  const clientes = db.clientes
-    .filter((c) => c.status !== "INATIVO")
-    .slice()
-    .sort((a, b) => a.nome.localeCompare(b.nome));
   const usuarios = db.usuarios.slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const nome = String(formData.get("nome") ?? "").trim();
-    const clienteId = String(formData.get("clienteId") ?? "");
     const csResponsavelId = String(formData.get("csResponsavelId") ?? "") || null;
     const dataInicio = String(formData.get("dataInicio") ?? "").trim() || null;
 
-    if (!nome || !clienteId) {
-      alert("Nome e cliente são obrigatórios");
+    if (!nome) {
+      alert("Nome do projeto é obrigatório");
       return;
     }
 
@@ -40,7 +35,6 @@ export default function NovoProjetoPage() {
       dbW.projetos.push({
         id: projetoId,
         nome,
-        clienteId,
         csResponsavelId,
         dataInicio,
         status: "ATIVO",
@@ -68,23 +62,17 @@ export default function NovoProjetoPage() {
 
   return (
     <div className="max-w-xl space-y-6">
-      <h1 className="text-lg font-semibold text-neutral-900">Novo projeto</h1>
+      <div>
+        <h1 className="text-lg font-semibold text-neutral-900">Novo projeto</h1>
+        <p className="text-sm text-neutral-500">
+          Cria o projeto vazio — depois é só entrar nele e adicionar os clientes um a um.
+        </p>
+      </div>
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Nome do projeto</label>
-            <input name="nome" required className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Cliente</label>
-            <select name="clienteId" required className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" defaultValue="">
-              <option value="">Selecione...</option>
-              {clientes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nome}
-                </option>
-              ))}
-            </select>
+            <input name="nome" required placeholder="Ex: Marketing 360" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">CS responsável</label>

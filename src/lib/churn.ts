@@ -20,19 +20,28 @@ function classificarRisco(scoreSaudeGeral: number): NivelRisco {
 const PESO_ATIVO = 0.5;
 const PESO_PASSIVO = 0.5;
 
-export function calcularRiscoChurn(cicloId: string) {
+// Calcula o risco de UM cliente dentro de um ciclo de avaliação do projeto
+// (um ciclo cobre todos os clientes do projeto; cada cliente tem seu próprio
+// health score dentro dele).
+export function calcularRiscoChurn(cicloId: string, clienteId: string) {
   return mutateDb((db) => {
     const ciclo = db.ciclosAvaliacao.find((c) => c.id === cicloId);
     if (!ciclo) throw new Error("Ciclo não encontrado");
-    const projeto = db.projetos.find((p) => p.id === ciclo.projetoId);
-    if (!projeto) throw new Error("Projeto não encontrado");
+    const cliente = db.clientes.find((c) => c.id === clienteId);
+    if (!cliente) throw new Error("Cliente não encontrado");
 
-    const respostasAtivas = db.respostasAtivas.filter((r) => r.cicloId === cicloId);
-    const respostasPassivas = db.respostasPassivas.filter((r) => r.cicloId === cicloId);
-    const registrosMeta = db.registrosMeta.filter((r) => r.cicloId === cicloId);
+    const contatosDoCliente = db.contatosCliente.filter((c) => c.clienteId === clienteId).map((c) => c.id);
+    const respostasAtivas = db.respostasAtivas.filter(
+      (r) => r.cicloId === cicloId && contatosDoCliente.includes(r.contatoClienteId)
+    );
+    const respostasPassivas = db.respostasPassivas.filter((r) => r.cicloId === cicloId && r.clienteId === clienteId);
+    const metasDoCliente = db.metasCliente.filter((m) => m.clienteId === clienteId).map((m) => m.id);
+    const registrosMeta = db.registrosMeta.filter(
+      (r) => r.cicloId === cicloId && metasDoCliente.includes(r.metaClienteId)
+    );
 
     if (respostasAtivas.length === 0 && respostasPassivas.length === 0 && registrosMeta.length === 0) {
-      throw new Error("Não há respostas registradas neste ciclo para calcular o risco");
+      throw new Error("Não há respostas registradas para este cliente neste ciclo");
     }
 
     const notasMetaAtingida = registrosMeta.map((r) => {
@@ -61,13 +70,14 @@ export function calcularRiscoChurn(cicloId: string) {
     for (const [categoria, notas] of categoriasAtivas) {
       const mediaNota = media(notas)!;
       const existente = db.pontuacoesCategoria.find(
-        (p) => p.cicloId === cicloId && p.polo === "ATIVO" && p.categoria === categoria
+        (p) => p.cicloId === cicloId && p.clienteId === clienteId && p.polo === "ATIVO" && p.categoria === categoria
       );
       if (existente) existente.mediaNota = mediaNota;
       else
         db.pontuacoesCategoria.push({
           id: novoId("pontuacao"),
           cicloId,
+          clienteId,
           polo: "ATIVO",
           categoria,
           mediaNota,
@@ -76,13 +86,14 @@ export function calcularRiscoChurn(cicloId: string) {
     for (const [categoria, notas] of categoriasPassivas) {
       const mediaNota = media(notas)!;
       const existente = db.pontuacoesCategoria.find(
-        (p) => p.cicloId === cicloId && p.polo === "PASSIVO" && p.categoria === categoria
+        (p) => p.cicloId === cicloId && p.clienteId === clienteId && p.polo === "PASSIVO" && p.categoria === categoria
       );
       if (existente) existente.mediaNota = mediaNota;
       else
         db.pontuacoesCategoria.push({
           id: novoId("pontuacao"),
           cicloId,
+          clienteId,
           polo: "PASSIVO",
           categoria,
           mediaNota,
@@ -99,7 +110,7 @@ export function calcularRiscoChurn(cicloId: string) {
 
     const nivelRisco = classificarRisco(scoreSaudeGeral);
 
-    let riscoChurn = db.riscosChurn.find((r) => r.cicloId === cicloId);
+    let riscoChurn = db.riscosChurn.find((r) => r.cicloId === cicloId && r.clienteId === clienteId);
     if (riscoChurn) {
       riscoChurn.scoreAtivo = scoreAtivo;
       riscoChurn.scorePassivo = scorePassivo;
@@ -113,7 +124,7 @@ export function calcularRiscoChurn(cicloId: string) {
         id: novoId("risco"),
         cicloId,
         projetoId: ciclo.projetoId,
-        clienteId: projeto.clienteId,
+        clienteId,
         scoreAtivo,
         scorePassivo,
         pesoAtivo: PESO_ATIVO,
@@ -125,7 +136,7 @@ export function calcularRiscoChurn(cicloId: string) {
       db.riscosChurn.push(riscoChurn);
     }
 
-    atualizarPerfilRiscoCliente(db, projeto.clienteId);
+    atualizarPerfilRiscoCliente(db, clienteId);
 
     return riscoChurn;
   });

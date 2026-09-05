@@ -1,23 +1,30 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-client";
+import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId } from "@/lib/store";
 import { Card } from "@/components/ui";
 
 export default function NovoClientePage() {
   const { user, pronto } = useAuth();
+  const db = useDb();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const projetoIdPreSelecionado = searchParams.get("projetoId") ?? "";
 
-  if (!pronto || !user) return null;
+  if (!pronto || !db || !user) return null;
   if (user.papel !== "ADMIN") {
     return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
   }
+
+  const projetos = db.projetos.slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
+    const projetoId = String(formData.get("projetoId") ?? "");
     const nome = String(formData.get("nome") ?? "").trim();
     const cnpj = String(formData.get("cnpj") ?? "").trim() || null;
     const segmento = String(formData.get("segmento") ?? "").trim() || null;
@@ -26,17 +33,18 @@ export default function NovoClientePage() {
     const contatoEmail = String(formData.get("contatoEmail") ?? "").trim();
     const contatoCargo = String(formData.get("contatoCargo") ?? "").trim() || null;
 
-    if (!nome) {
-      alert("Nome do cliente é obrigatório");
+    if (!nome || !projetoId) {
+      alert("Nome do cliente e projeto são obrigatórios");
       return;
     }
 
     const agora = new Date().toISOString();
     const clienteId = novoId("cliente");
 
-    mutateDb((db) => {
-      db.clientes.push({
+    mutateDb((dbW) => {
+      dbW.clientes.push({
         id: clienteId,
+        projetoId,
         nome,
         cnpj,
         segmento,
@@ -45,7 +53,7 @@ export default function NovoClientePage() {
         criadoEm: agora,
       });
       if (contatoNome) {
-        db.contatosCliente.push({
+        dbW.contatosCliente.push({
           id: novoId("contato"),
           clienteId,
           nome: contatoNome,
@@ -56,7 +64,7 @@ export default function NovoClientePage() {
           criadoEm: agora,
         });
       }
-      db.perfisRisco.push({
+      dbW.perfisRisco.push({
         id: novoId("perfil"),
         clienteId,
         propensaoRisco: 0,
@@ -73,6 +81,25 @@ export default function NovoClientePage() {
       <h1 className="text-lg font-semibold text-neutral-900">Novo cliente</h1>
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Projeto</label>
+            <select
+              name="projetoId"
+              required
+              defaultValue={projetoIdPreSelecionado}
+              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            >
+              <option value="">Selecione...</option>
+              {projetos.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome}
+                </option>
+              ))}
+            </select>
+            {projetos.length === 0 && (
+              <p className="text-xs text-red-600 mt-1">Nenhum projeto criado ainda — crie um projeto primeiro.</p>
+            )}
+          </div>
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Nome do cliente</label>
             <input name="nome" required className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />

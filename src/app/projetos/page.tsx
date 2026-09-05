@@ -6,6 +6,8 @@ import { useDb } from "@/lib/useDb";
 import { mutateDb, excluirProjeto } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 
+const ORDEM_RISCO = ["CRITICO", "ALTO", "MEDIO", "BAIXO"] as const;
+
 export default function ProjetosPage() {
   const { user, pronto } = useAuth();
   const db = useDb();
@@ -17,24 +19,34 @@ export default function ProjetosPage() {
 
   const projetos = db.projetos
     .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
-    .map((p) => ({
-      ...p,
-      cliente: db.clientes.find((c) => c.id === p.clienteId)!,
-      riscoChurn: db.riscosChurn
-        .filter((r) => r.projetoId === p.id)
-        .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0],
-    }))
-    .filter((p) => p.cliente && p.cliente.status !== "INATIVO")
+    .map((p) => {
+      const clientesDoProjeto = db.clientes.filter((c) => c.projetoId === p.id);
+      const niveis = clientesDoProjeto
+        .map(
+          (c) =>
+            db.riscosChurn
+              .filter((r) => r.clienteId === c.id)
+              .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0]?.nivelRisco
+        )
+        .filter(Boolean);
+      const piorRisco = ORDEM_RISCO.find((n) => niveis.includes(n as never));
+      return { ...p, totalClientes: clientesDoProjeto.length, piorRisco };
+    })
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   function handleExcluir(e: React.MouseEvent, projetoId: string, nome: string) {
     e.preventDefault();
     e.stopPropagation();
-    if (!window.confirm(`Excluir o projeto "${nome}"? Isso remove todos os ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`)) {
+    if (
+      !window.confirm(
+        `Excluir o projeto "${nome}"? Isso remove TODOS os clientes, ciclos, respostas e histórico dele. Essa ação não pode ser desfeita.`
+      )
+    ) {
       return;
     }
     mutateDb((dbW) => excluirProjeto(dbW, projetoId));
   }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -52,11 +64,13 @@ export default function ProjetosPage() {
             <Card className="hover:border-neutral-400 transition flex items-center justify-between">
               <div>
                 <div className="font-medium text-neutral-900">{p.nome}</div>
-                <div className="text-sm text-neutral-500">{p.cliente.nome}</div>
+                <div className="text-sm text-neutral-500">
+                  {p.totalClientes} cliente{p.totalClientes === 1 ? "" : "s"}
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <StatusBadge status={p.status} />
-                <RiscoBadge nivel={p.riscoChurn?.nivelRisco} />
+                <RiscoBadge nivel={p.piorRisco} />
                 {isAdmin && (
                   <button
                     onClick={(e) => handleExcluir(e, p.id, p.nome)}
