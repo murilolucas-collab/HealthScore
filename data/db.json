@@ -62,7 +62,18 @@
       "criadoEm": "2026-09-05T02:44:17.435Z"
     }
   ],
-  "eventosCliente": [],
+  "eventosCliente": [
+    {
+      "id": "evento_8c7b4016-55b7-45bd-905f-087c65b3656b",
+      "clienteId": "cliente_388c30a4-c62c-488e-8837-df60b4f63aef",
+      "projetoId": "projeto_4beaad3f-b1b6-4c6f-9ff6-30ad9ad81173",
+      "tipo": "ELOGIO",
+      "descricao": "Atendimento otimo",
+      "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataOcorrencia": "2026-09-05T02:45:28.871Z",
+      "criadoEm": "2026-09-05T02:45:28.871Z"
+    }
+  ],
   "perfisRisco": [
     {
       "id": "perfil_319b4d7e-3420-4c78-b32a-68c8ac91c78b",
