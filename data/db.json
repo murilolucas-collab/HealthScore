@@ -18,13 +18,43 @@
     }
   ],
   "acessosProjeto": [],
-  "clientes": [],
+  "clientes": [
+    {
+      "id": "cliente_388c30a4-c62c-488e-8837-df60b4f63aef",
+      "projetoId": "projeto_4beaad3f-b1b6-4c6f-9ff6-30ad9ad81173",
+      "nome": "PEDRO",
+      "cnpj": "000.000.000.000-1.00",
+      "segmento": "Farmacia",
+      "inicioContrato": "0001-01-11",
+      "status": "ATIVO",
+      "criadoEm": "2026-09-05T02:44:17.435Z"
+    }
+  ],
   "metasCliente": [],
   "registrosMeta": [],
   "formulariosSaida": [],
-  "contatosCliente": [],
+  "contatosCliente": [
+    {
+      "id": "contato_5faa61b2-19eb-4394-8399-054f13e366f0",
+      "clienteId": "cliente_388c30a4-c62c-488e-8837-df60b4f63aef",
+      "nome": "PEDRO",
+      "email": "pedro@Gmail.com",
+      "cargo": "Dono",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-09-05T02:44:17.435Z"
+    }
+  ],
   "eventosCliente": [],
-  "perfisRisco": [],
+  "perfisRisco": [
+    {
+      "id": "perfil_319b4d7e-3420-4c78-b32a-68c8ac91c78b",
+      "clienteId": "cliente_388c30a4-c62c-488e-8837-df60b4f63aef",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-09-05T02:44:17.435Z"
+    }
+  ],
   "projetos": [
     {
       "id": "projeto_4beaad3f-b1b6-4c6f-9ff6-30ad9ad81173",
