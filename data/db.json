@@ -88,12 +88,27 @@
       "dataInicio": "2026-09-17",
       "status": "ATIVO",
       "criadoEm": "2026-09-01T22:26:44.847Z"
+    },
+    {
+      "id": "projeto_4beaad3f-b1b6-4c6f-9ff6-30ad9ad81173",
+      "nome": "VUPT ADS",
+      "csResponsavelId": null,
+      "dataInicio": "1111-11-11",
+      "status": "ATIVO",
+      "criadoEm": "2026-09-05T02:41:06.487Z"
     }
   ],
   "configuracoesCiclo": [
     {
       "id": "config_e167dd61-3c70-44b6-b8ad-74ce6f4c1824",
       "projetoId": "projeto_58e38a91-5927-42ef-a41a-7cd9e7a64e84",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    },
+    {
+      "id": "config_a54b72ed-657c-42e6-9c0c-f824b80f5330",
+      "projetoId": "projeto_4beaad3f-b1b6-4c6f-9ff6-30ad9ad81173",
       "periodicidade": "MENSAL",
       "diaDisparo": 1,
       "ativo": true
