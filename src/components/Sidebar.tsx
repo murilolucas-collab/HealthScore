@@ -1,19 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useAuth, getProjetoIdsDoUsuario } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { getGithubConfig } from "@/lib/github-sync";
+import { buscarDbRemoto } from "@/lib/github-sync";
 import SidebarNavLink from "@/components/SidebarNavLink";
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const db = useDb();
+  const [syncAtivo, setSyncAtivo] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelado = false;
+    buscarDbRemoto().then((resultado) => {
+      if (!cancelado) setSyncAtivo(resultado.existe !== null);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   if (!user || !db) return null;
 
   const isAdmin = user.papel === "ADMIN";
   const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
-  const githubConfig = getGithubConfig();
 
   const projetos = db.projetos
     .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
@@ -58,8 +69,12 @@ export default function Sidebar() {
 
       <div className="px-4 py-4 border-t border-neutral-200 text-sm">
         <div className="mb-2 flex items-center gap-1.5 text-xs text-neutral-400">
-          <span className={`inline-block w-1.5 h-1.5 rounded-full ${githubConfig ? "bg-emerald-500" : "bg-neutral-300"}`} />
-          {githubConfig ? `Sincronizado: ${githubConfig.owner}/${githubConfig.repo}` : "GitHub não conectado"}
+          <span
+            className={`inline-block w-1.5 h-1.5 rounded-full ${
+              syncAtivo === true ? "bg-emerald-500" : syncAtivo === false ? "bg-neutral-300" : "bg-neutral-200"
+            }`}
+          />
+          {syncAtivo === true ? "Sincronização automática ativa" : syncAtivo === false ? "Sincronização não configurada" : "Verificando sincronização..."}
         </div>
         <div className="mb-2 text-neutral-700">
           {user.nome} <span className="block text-xs uppercase text-neutral-400">{user.papel}</span>

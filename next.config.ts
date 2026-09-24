@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
-// Export 100% estático: não há backend, banco de dados ou API routes.
-// Todos os dados vivem em localStorage, no navegador de quem usa o app.
-// Isso gera uma pasta "out/" pronta para qualquer hospedagem estática (Netlify, etc).
-const nextConfig: NextConfig = {
-  output: "export",
-  images: { unoptimized: true },
-};
+// Deixou de ser export estático: agora existe uma rota de API
+// (src/app/api/data/route.ts) rodando como função serverless na Vercel.
+// É ela que guarda com segurança o token do GitHub (nunca chega ao
+// navegador) e sincroniza os dados automaticamente, sem precisar de nenhuma
+// configuração manual por quem usa o site.
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
