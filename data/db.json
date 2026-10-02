@@ -1,14 +1,6 @@
 {
   "usuarios": [
     {
-      "id": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
-      "nome": "Admin Geral",
-      "email": "admin@agencia.com",
-      "senhaHash": "$2b$10$.BEl8dchvMLDqmdpg/o80u38ETGnW3RxgO6XGMSsYP9I3y7QuXxmC",
-      "papel": "ADMIN",
-      "criadoEm": "2026-08-29T02:43:59.279Z"
-    },
-    {
       "id": "usuario_d439f41a-db8d-4fc5-bf92-71507cfa85ae",
       "nome": "Murilo",
       "email": "murilolucas@3pontoscompany.com.br",
