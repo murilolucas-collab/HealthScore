@@ -7,14 +7,6 @@
       "senhaHash": "$2b$10$.BEl8dchvMLDqmdpg/o80u38ETGnW3RxgO6XGMSsYP9I3y7QuXxmC",
       "papel": "ADMIN",
       "criadoEm": "2026-08-29T02:43:59.279Z"
-    },
-    {
-      "id": "usuario_77c23379-18af-4c40-8508-98ecb8a72f0f",
-      "nome": "teste123",
-      "email": "teste123@123.com",
-      "senhaHash": "$2b$10$yZc2Y/EjnuTZhogaR8oqOuSVaSU3Gx63.e214vBsx6IOg4VsnZYR.",
-      "papel": "PADRAO",
-      "criadoEm": "2026-09-01T17:27:46.299Z"
     }
   ],
   "acessosProjeto": [],
