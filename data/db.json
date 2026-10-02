@@ -15,6 +15,14 @@
       "senhaHash": "$2b$10$CDPz67GUZDnuFzEaw/lQMeCpSDH8NkuVks4cbztOT0jsTMfSiHYLa",
       "papel": "ADMIN",
       "criadoEm": "2026-10-02T18:55:26.265Z"
+    },
+    {
+      "id": "usuario_75babbb6-4a46-4c6c-afbc-25a92bfc4cce",
+      "nome": "Larissa",
+      "email": "larissasilva@3pontoscompany.com.br",
+      "senhaHash": "$2b$10$JmRINa1M8NOHsWFLSbHnD.oo47PXh4a75gwxHcqeBPYKOgVkio1Ai",
+      "papel": "ADMIN",
+      "criadoEm": "2026-10-02T18:56:22.392Z"
     }
   ],
   "acessosProjeto": [],
