@@ -63,7 +63,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-xs text-neutral-400">
-          Usuário de teste: admin@agencia.com / admin123
+          -
         </p>
       </div>
     </div>
