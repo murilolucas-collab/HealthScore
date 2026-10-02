@@ -7,6 +7,14 @@
       "senhaHash": "$2b$10$.BEl8dchvMLDqmdpg/o80u38ETGnW3RxgO6XGMSsYP9I3y7QuXxmC",
       "papel": "ADMIN",
       "criadoEm": "2026-08-29T02:43:59.279Z"
+    },
+    {
+      "id": "usuario_d439f41a-db8d-4fc5-bf92-71507cfa85ae",
+      "nome": "Murilo",
+      "email": "murilolucas@3pontoscompany.com.br",
+      "senhaHash": "$2b$10$rkiUXzxMW.Tnz/znqKXMHeT8dz8JFDVetRTW06h73mjxQUV0Iza6y",
+      "papel": "ADMIN",
+      "criadoEm": "2026-10-02T18:52:58.994Z"
     }
   ],
   "acessosProjeto": [],
