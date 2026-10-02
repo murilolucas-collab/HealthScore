@@ -41,7 +41,7 @@ export default function LoginPage() {
               name="email"
               required
               className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              placeholder="admin@agencia.com"
+              placeholder="ㅤ"
             />
           </div>
           <div>
@@ -51,7 +51,7 @@ export default function LoginPage() {
               name="senha"
               required
               className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              placeholder="••••••••"
+              placeholder="ㅤ"
             />
           </div>
           <button
