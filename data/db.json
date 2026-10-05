@@ -26,13 +26,43 @@
     }
   ],
   "acessosProjeto": [],
-  "clientes": [],
+  "clientes": [
+    {
+      "id": "cliente_cc7efc11-226f-4ac5-91d6-14c3dfcb8a82",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "nome": "CLIENTE TESTE 1",
+      "cnpj": "000.000.000.000-1.00",
+      "segmento": "Farmacia",
+      "inicioContrato": "2026-10-05",
+      "status": "ATIVO",
+      "criadoEm": "2026-10-05T12:29:02.799Z"
+    }
+  ],
   "metasCliente": [],
   "registrosMeta": [],
   "formulariosSaida": [],
-  "contatosCliente": [],
+  "contatosCliente": [
+    {
+      "id": "contato_4a6ebc4a-7f8a-491b-979a-46a282f9a47c",
+      "clienteId": "cliente_cc7efc11-226f-4ac5-91d6-14c3dfcb8a82",
+      "nome": "teste",
+      "email": "teste@teste.com",
+      "cargo": "123",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-10-05T12:29:02.799Z"
+    }
+  ],
   "eventosCliente": [],
-  "perfisRisco": [],
+  "perfisRisco": [
+    {
+      "id": "perfil_65b0f7bf-6a1a-441e-92b4-33503b327993",
+      "clienteId": "cliente_cc7efc11-226f-4ac5-91d6-14c3dfcb8a82",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-10-05T12:29:02.799Z"
+    }
+  ],
   "projetos": [
     {
       "id": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
