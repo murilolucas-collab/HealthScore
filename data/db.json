@@ -33,8 +33,25 @@
   "contatosCliente": [],
   "eventosCliente": [],
   "perfisRisco": [],
-  "projetos": [],
-  "configuracoesCiclo": [],
+  "projetos": [
+    {
+      "id": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "nome": "PROJETO TESTE",
+      "csResponsavelId": null,
+      "dataInicio": "2026-10-05",
+      "status": "ATIVO",
+      "criadoEm": "2026-10-05T12:28:29.945Z"
+    }
+  ],
+  "configuracoesCiclo": [
+    {
+      "id": "config_0e5870ad-6b1d-4e1d-8941-2f43fe9a9c0f",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "periodicidade": "MENSAL",
+      "diaDisparo": 1,
+      "ativo": true
+    }
+  ],
   "perguntasTemplate": [
     {
       "id": "pergunta_808da3cb-8e37-4bb4-9e55-2341a545bccd",
