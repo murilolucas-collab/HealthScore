@@ -113,6 +113,16 @@
       "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataOcorrencia": "2026-10-05T12:30:37.763Z",
       "criadoEm": "2026-10-05T12:30:37.763Z"
+    },
+    {
+      "id": "evento_57b94ebc-c597-4d14-8493-df972ef89a95",
+      "clienteId": "cliente_747654d7-6f95-4a10-a6ee-849773ea6106",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "tipo": "ELOGIO",
+      "descricao": "Criativos ok",
+      "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataOcorrencia": "2026-10-05T12:30:57.447Z",
+      "criadoEm": "2026-10-05T12:30:57.447Z"
     }
   ],
   "perfisRisco": [
