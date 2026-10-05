@@ -54,13 +54,25 @@
       "cnpj": "000.000.000.000-1.00",
       "segmento": "123",
       "inicioContrato": "2026-10-05",
-      "status": "ATIVO",
+      "status": "INATIVO",
       "criadoEm": "2026-10-05T12:29:52.095Z"
     }
   ],
   "metasCliente": [],
   "registrosMeta": [],
-  "formulariosSaida": [],
+  "formulariosSaida": [
+    {
+      "id": "saida_65d00095-da7e-4de7-bcd2-d1f317981f1d",
+      "clienteId": "cliente_747654d7-6f95-4a10-a6ee-849773ea6106",
+      "motivoPrincipal": "RESULTADOS_INSATISFATORIOS",
+      "detalhamento": "Cliente nao gostou da loja VUPT",
+      "poderiaSerEvitado": false,
+      "notaSatisfacaoGeral": 3,
+      "responsavelId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataSaida": "2026-10-05T12:33:03.759Z",
+      "criadoEm": "2026-10-05T12:33:03.759Z"
+    }
+  ],
   "contatosCliente": [
     {
       "id": "contato_4a6ebc4a-7f8a-491b-979a-46a282f9a47c",
