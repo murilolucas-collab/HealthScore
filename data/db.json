@@ -91,6 +91,16 @@
       "telefone": null,
       "principal": true,
       "criadoEm": "2026-10-05T12:29:52.095Z"
+    },
+    {
+      "id": "contato_d4bd85d5-630a-4125-af09-1d26b2539128",
+      "clienteId": "cliente_747654d7-6f95-4a10-a6ee-849773ea6106",
+      "nome": "TESTE123",
+      "email": "teste123@123.com",
+      "cargo": "123",
+      "telefone": null,
+      "principal": false,
+      "criadoEm": "2026-10-05T12:30:11.434Z"
     }
   ],
   "eventosCliente": [],
