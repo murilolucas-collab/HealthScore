@@ -46,6 +46,16 @@
       "inicioContrato": "2026-10-05",
       "status": "ATIVO",
       "criadoEm": "2026-10-05T12:29:28.565Z"
+    },
+    {
+      "id": "cliente_747654d7-6f95-4a10-a6ee-849773ea6106",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "nome": "CLIENTE TESTE 3",
+      "cnpj": "000.000.000.000-1.00",
+      "segmento": "123",
+      "inicioContrato": "2026-10-05",
+      "status": "ATIVO",
+      "criadoEm": "2026-10-05T12:29:52.095Z"
     }
   ],
   "metasCliente": [],
@@ -71,6 +81,16 @@
       "telefone": null,
       "principal": true,
       "criadoEm": "2026-10-05T12:29:28.565Z"
+    },
+    {
+      "id": "contato_77e8eae5-7721-4d30-9924-0d9883e72389",
+      "clienteId": "cliente_747654d7-6f95-4a10-a6ee-849773ea6106",
+      "nome": "teste",
+      "email": "teste@teste.com",
+      "cargo": "123",
+      "telefone": null,
+      "principal": true,
+      "criadoEm": "2026-10-05T12:29:52.095Z"
     }
   ],
   "eventosCliente": [],
@@ -88,6 +108,13 @@
       "propensaoRisco": 0,
       "tendencia": "ESTAVEL",
       "atualizadoEm": "2026-10-05T12:29:28.565Z"
+    },
+    {
+      "id": "perfil_69877bdb-4bc2-4105-9d32-612197fed826",
+      "clienteId": "cliente_747654d7-6f95-4a10-a6ee-849773ea6106",
+      "propensaoRisco": 0,
+      "tendencia": "ESTAVEL",
+      "atualizadoEm": "2026-10-05T12:29:52.095Z"
     }
   ],
   "projetos": [
