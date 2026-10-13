@@ -2,6 +2,7 @@ node_modules/
 .next/
 out/
 .netlify/
+*.tsbuildinfo
 *.log
 .env
 .env.local
