@@ -1,2 +1,26 @@
-𝙳𝚎𝚜𝚎𝚗𝚟𝚘𝚕𝚟𝚒𝚍𝚘 𝚙𝚘𝚛 𝚖𝚞𝚛𝚒𝚕𝚘 𝚕𝚞𝚌𝚊𝚜        
-    𝙷𝚎𝚊𝚕𝚝𝚑𝚂𝚌𝚘𝚛𝚎 ( 𝙲𝚊𝚕𝚌𝚞𝚕𝚊𝚍𝚘𝚛𝚊 𝚙𝚊𝚛𝚊 𝚛𝚒𝚜𝚌𝚘 𝚍𝚎 𝚌𝚑𝚞𝚛𝚗 )
+# HealthScore
+
+Aplicação Next.js para acompanhar a saúde de clientes e calcular risco de churn.
+
+## Executar localmente
+
+```bash
+npm install
+npm run dev
+```
+
+Abra `http://localhost:3000`. Os dados iniciais são carregados de `data/db.json` e,
+depois do primeiro acesso, ficam salvos no navegador.
+
+## Sincronização com GitHub
+
+Para persistir os dados em um repositório, configure no ambiente de produção:
+
+```text
+GITHUB_OWNER=seu-usuario
+GITHUB_REPO=seu-repositorio
+GITHUB_BRANCH=main
+GITHUB_TOKEN=seu-token-com-permissao-contents
+```
+
+O token deve ser criado como segredo do provedor de hospedagem e nunca commitado.
