@@ -1,10 +1,7 @@
 node_modules/
 .next/
-.next-build/
-.next-prod/
 out/
 .netlify/
-.vercel/
 *.tsbuildinfo
 *.log
 .env
