@@ -5,6 +5,13 @@ import type { NextConfig } from "next";
 // É ela que guarda com segurança o token do GitHub (nunca chega ao
 // navegador) e sincroniza os dados automaticamente, sem precisar de nenhuma
 // configuração manual por quem usa o site.
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  distDir: ".next-prod",
+  outputFileTracingRoot: process.cwd(),
+  experimental: {
+    cpus: 1,
+    workerThreads: false,
+  },
+};
 
 export default nextConfig;
