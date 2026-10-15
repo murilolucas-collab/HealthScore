@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAuth } from "@/lib/auth-client";
+import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId, excluirCliente } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
@@ -39,9 +39,7 @@ export default function ClienteDetalhePage() {
   const db = useDb();
 
   if (!pronto || !db || !user) return null;
-  if (user.papel !== "ADMIN") {
-    return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
-  }
+  if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
 
   const cliente = db.clientes.find((c) => c.id === id);
   if (!cliente) return <p className="text-sm text-neutral-500">Cliente não encontrado.</p>;
@@ -49,6 +47,11 @@ export default function ClienteDetalhePage() {
   const contatos = db.contatosCliente.filter((c) => c.clienteId === id);
   const perfilRisco = db.perfisRisco.find((p) => p.clienteId === id);
   const projeto = db.projetos.find((p) => p.id === cliente.projetoId);
+  if (user.papel !== "ADMIN" && !podeAcessarProjeto(user, cliente.projetoId)) {
+    return <p className="text-sm text-neutral-500">Você não tem acesso ao projeto deste cliente.</p>;
+  }
+  const podeGerenciar = temPermissao(user, "gerenciarClientes");
+  const podeAlterarStatus = temPermissao(user, "alterarStatusCliente");
   const riscoAtual = db.riscosChurn
     .filter((r) => r.clienteId === id)
     .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0];
@@ -64,6 +67,7 @@ export default function ClienteDetalhePage() {
 
   function handleContato(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!podeGerenciar) return;
     const formData = new FormData(e.currentTarget);
     const nome = String(formData.get("nome") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
@@ -89,6 +93,7 @@ export default function ClienteDetalhePage() {
 
   function handleEvento(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!podeGerenciar) return;
     const formData = new FormData(e.currentTarget);
     const tipo = String(formData.get("tipo") ?? "OUTRO") as TipoEvento;
     const descricao = String(formData.get("descricao") ?? "").trim();
@@ -113,6 +118,7 @@ export default function ClienteDetalhePage() {
 
   function handleMeta(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!podeGerenciar) return;
     const formData = new FormData(e.currentTarget);
     const nome = String(formData.get("nome") ?? "").trim();
     const valorAlvoStr = String(formData.get("valorAlvo") ?? "").trim();
@@ -136,6 +142,7 @@ export default function ClienteDetalhePage() {
   }
 
   function encerrarMeta(metaId: string) {
+    if (!podeGerenciar) return;
     mutateDb((dbW) => {
       const meta = dbW.metasCliente.find((m) => m.id === metaId);
       if (meta) meta.ativa = false;
@@ -144,6 +151,7 @@ export default function ClienteDetalhePage() {
 
   function handleStatus(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!podeAlterarStatus) return;
     const formData = new FormData(e.currentTarget);
     const status = String(formData.get("status") ?? "ATIVO") as StatusCliente;
     mutateDb((dbW) => {
@@ -153,6 +161,7 @@ export default function ClienteDetalhePage() {
   }
 
   function handleExcluir() {
+    if (!podeGerenciar) return;
     if (
       !window.confirm(
         `Excluir "${cliente!.nome}" definitivamente? Isso apaga também todos os projetos, ciclos, respostas e histórico desse cliente. Não pode ser desfeito.`
@@ -166,6 +175,12 @@ export default function ClienteDetalhePage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 text-sm text-neutral-500">
+        <Link href="/clientes" className="hover:text-neutral-900 hover:underline">Clientes</Link>
+        <span aria-hidden="true">/</span>
+        {projeto && <><Link href={`/projetos/detalhe?id=${projeto.id}`} className="hover:text-neutral-900 hover:underline">{projeto.nome}</Link><span aria-hidden="true">/</span></>}
+        <span className="text-neutral-900">{cliente.nome}</span>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">{cliente.nome}</h1>
@@ -189,24 +204,20 @@ export default function ClienteDetalhePage() {
       <div className="flex items-center gap-4">
         {cliente.status !== "INATIVO" ? (
           <>
-            <form onSubmit={handleStatus} className="flex items-center gap-2">
+            {podeAlterarStatus ? <form onSubmit={handleStatus} className="flex items-center gap-2">
               <label className="text-sm text-neutral-600">Status do cliente:</label>
               <select name="status" defaultValue={cliente.status} className="rounded-md border border-neutral-300 px-2 py-1 text-sm">
                 <option value="ATIVO">Ativo</option>
                 <option value="EM_RISCO">Em risco</option>
               </select>
               <button className="text-sm underline text-neutral-600 hover:text-neutral-900">Salvar</button>
-            </form>
-            <Link href={`/clientes/saida?id=${cliente.id}`} className="text-sm text-red-600 underline hover:text-red-800">
-              Encerrar cliente (registrar saída)
-            </Link>
+            </form> : <span className="text-sm text-neutral-500">Status do cliente: {cliente.status === "EM_RISCO" ? "Em risco" : "Ativo"}</span>}
+            {podeGerenciar && <Link href={`/clientes/saida?id=${cliente.id}`} className="text-sm text-red-600 underline hover:text-red-800">Encerrar cliente (registrar saída)</Link>}
           </>
         ) : (
           <span className="text-sm text-neutral-500">Cliente encerrado — veja o formulário de saída abaixo.</span>
         )}
-        <button onClick={handleExcluir} className="text-sm text-red-600 underline hover:text-red-800 ml-auto">
-          Excluir cliente definitivamente
-        </button>
+        {podeGerenciar && <button onClick={handleExcluir} className="text-sm text-red-600 underline hover:text-red-800 ml-auto">Excluir cliente definitivamente</button>}
       </div>
 
       {formularioSaida && responsavelSaida && (
@@ -271,12 +282,12 @@ export default function ClienteDetalhePage() {
             ))}
             {contatos.length === 0 && <p className="text-sm text-neutral-500">Nenhum contato cadastrado.</p>}
           </div>
-          <form onSubmit={handleContato} className="grid grid-cols-2 gap-2">
+          {podeGerenciar && <form onSubmit={handleContato} className="grid grid-cols-2 gap-2">
             <input name="nome" placeholder="Nome" required className="col-span-2 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
             <input name="email" type="email" placeholder="Email" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
             <input name="cargo" placeholder="Cargo" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
             <button className="col-span-2 bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Adicionar contato</button>
-          </form>
+          </form>}
         </Card>
       </div>
 
@@ -299,17 +310,17 @@ export default function ClienteDetalhePage() {
           ))}
           {metas.length === 0 && <p className="text-sm text-neutral-500">Nenhuma meta cadastrada ainda.</p>}
         </div>
-        <form onSubmit={handleMeta} className="grid grid-cols-3 gap-2">
+        {podeGerenciar && <form onSubmit={handleMeta} className="grid grid-cols-3 gap-2">
           <input name="nome" placeholder="Nome (ex: Leads mensais)" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <input name="valorAlvo" type="number" step="any" placeholder="Valor alvo" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <input name="unidade" placeholder="Unidade (ex: leads, R$)" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <button className="col-span-3 bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Adicionar meta</button>
-        </form>
+        </form>}
       </Card>
 
       <Card>
         <h2 className="font-medium text-neutral-900 mb-3">Histórico do cliente (reclamações, intervenções, ações de CS...)</h2>
-        <form onSubmit={handleEvento} className="grid md:grid-cols-3 gap-2 mb-4">
+        {podeGerenciar && <form onSubmit={handleEvento} className="grid md:grid-cols-3 gap-2 mb-4">
           <select name="tipo" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
             {Object.entries(TIPO_EVENTO_LABEL).map(([valor, label]) => (
               <option key={valor} value={valor}>
@@ -319,7 +330,7 @@ export default function ClienteDetalhePage() {
           </select>
           <input name="descricao" placeholder="Descreva o ocorrido" required className="md:col-span-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <button className="bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Registrar</button>
-        </form>
+        </form>}
 
         <div className="space-y-2">
           {eventos.map((e) => (
