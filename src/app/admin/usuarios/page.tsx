@@ -1,11 +1,24 @@
 "use client";
 
-import { useAuth } from "@/lib/auth-client";
+import { useAuth, permissoesEfetivas } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId, excluirUsuario } from "@/lib/store";
 import { Card } from "@/components/ui";
 import bcrypt from "bcryptjs";
-import type { PapelUsuario } from "@/lib/types";
+import type { ModuloUsuario, PapelUsuario, PermissoesUsuario } from "@/lib/types";
+
+const MODULOS: { chave: ModuloUsuario; titulo: string }[] = [
+  { chave: "verDashboard", titulo: "Ver dashboard" },
+  { chave: "verProjetos", titulo: "Ver projetos" },
+  { chave: "verClientes", titulo: "Ver clientes" },
+  { chave: "gerenciarClientes", titulo: "Gerenciar contatos, metas e eventos" },
+  { chave: "alterarStatusCliente", titulo: "Alterar status do cliente" },
+  { chave: "calcularSaude", titulo: "Calcular saúde" },
+];
+
+function permissoesDoFormulario(formData: FormData): PermissoesUsuario {
+  return Object.fromEntries(MODULOS.map(({ chave }) => [chave, formData.get(`permissao_${chave}`) === "on"])) as PermissoesUsuario;
+}
 
 export default function UsuariosPage() {
   const { user, pronto } = useAuth();
@@ -34,6 +47,7 @@ export default function UsuariosPage() {
     const email = String(formData.get("email") ?? "").trim();
     const senha = String(formData.get("senha") ?? "");
     const papel = String(formData.get("papel") ?? "PADRAO") as PapelUsuario;
+    const permissoes = permissoesDoFormulario(formData);
 
     if (!nome || !email || senha.length < 6) {
       alert("Nome, email e senha (mín. 6 caracteres) são obrigatórios");
@@ -51,10 +65,20 @@ export default function UsuariosPage() {
         email,
         senhaHash: bcrypt.hashSync(senha, 10),
         papel,
+        permissoes: papel === "PADRAO" ? permissoes : undefined,
         criadoEm: new Date().toISOString(),
       });
     });
     e.currentTarget.reset();
+  }
+
+  function handlePermissoes(e: React.FormEvent<HTMLFormElement>, usuarioId: string) {
+    e.preventDefault();
+    const permissoes = permissoesDoFormulario(new FormData(e.currentTarget));
+    mutateDb((dbW) => {
+      const usuario = dbW.usuarios.find((u) => u.id === usuarioId);
+      if (usuario && usuario.papel === "PADRAO") usuario.permissoes = permissoes;
+    });
   }
 
   function handleExcluir(alvo: { id: string; nome: string; papel: PapelUsuario }) {
@@ -86,6 +110,17 @@ export default function UsuariosPage() {
             <option value="PADRAO">Padrão</option>
             <option value="ADMIN">Admin</option>
           </select>
+          <div className="md:col-span-4 rounded-md border border-neutral-200 bg-neutral-50 p-3">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Módulos do usuário padrão</p>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {MODULOS.map(({ chave, titulo }) => (
+                <label key={chave} className="flex items-center gap-2 text-xs text-neutral-700">
+                  <input type="checkbox" name={`permissao_${chave}`} defaultChecked={chave !== "gerenciarClientes" && chave !== "alterarStatusCliente"} />
+                  {titulo}
+                </label>
+              ))}
+            </div>
+          </div>
           <button className="md:col-span-4 bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Criar usuário</button>
         </form>
       </Card>
@@ -102,8 +137,19 @@ export default function UsuariosPage() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end gap-2">
               <span className="text-xs uppercase text-neutral-400">{u.papel}</span>
+              {u.papel === "PADRAO" && (
+                <form onSubmit={(e) => handlePermissoes(e, u.id)} className="grid grid-cols-2 gap-x-3 gap-y-1 rounded-md border border-neutral-200 bg-neutral-50 p-2">
+                  {MODULOS.map(({ chave, titulo }) => (
+                    <label key={chave} className="flex items-center gap-1 text-[11px] text-neutral-600">
+                      <input type="checkbox" name={`permissao_${chave}`} defaultChecked={permissoesEfetivas(u)[chave]} />
+                      {titulo}
+                    </label>
+                  ))}
+                  <button className="col-span-2 mt-1 text-left text-[11px] font-medium text-neutral-700 underline">Salvar módulos</button>
+                </form>
+              )}
               <button
                 onClick={() => handleExcluir(u)}
                 className="text-xs text-red-600 underline hover:text-red-800"
