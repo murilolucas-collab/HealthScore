@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth, getProjetoIdsDoUsuario } from "@/lib/auth-client";
+import Link from "next/link";
+import { useAuth, getProjetoIdsDoUsuario, isAdminGeral, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { buscarDbRemoto } from "@/lib/github-sync";
 import SidebarNavLink from "@/components/SidebarNavLink";
@@ -24,6 +25,9 @@ export default function Sidebar() {
   if (!user || !db) return null;
 
   const isAdmin = user.papel === "ADMIN";
+  const podeDashboard = temPermissao(user, "verDashboard");
+  const podeProjetos = temPermissao(user, "verProjetos");
+  const podeClientes = temPermissao(user, "verClientes");
   const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
 
   const projetos = db.projetos
@@ -32,22 +36,22 @@ export default function Sidebar() {
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   return (
-    <aside className="w-64 shrink-0 border-r border-neutral-200 bg-white min-h-screen flex flex-col">
+    <aside className="w-56 lg:w-64 shrink-0 border-r border-neutral-200 bg-white min-h-screen flex flex-col">
       <div className="px-4 py-4 border-b border-neutral-200">
-        <a href="/" className="text-base font-semibold text-neutral-900">
+        <Link href="/" className="text-base font-semibold text-neutral-900">
           Saúde de Clientes
-        </a>
+        </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        <SidebarNavLink href="/" exact>
-          Dashboard
-        </SidebarNavLink>
-        <SidebarNavLink href="/projetos">Projetos</SidebarNavLink>
-        <SidebarNavLink href="/admin/github">Sincronização GitHub</SidebarNavLink>
+        {podeDashboard && <SidebarNavLink href="/" exact>Dashboard</SidebarNavLink>}
+        {podeProjetos && <SidebarNavLink href="/projetos">Projetos</SidebarNavLink>}
+        {isAdminGeral(user) && (
+          <SidebarNavLink href="/admin/github">Sincronização GitHub</SidebarNavLink>
+        )}
         {isAdmin && (
           <>
-            <SidebarNavLink href="/clientes">Clientes</SidebarNavLink>
+            {podeClientes && <SidebarNavLink href="/clientes">Clientes</SidebarNavLink>}
             <SidebarNavLink href="/admin/usuarios">Usuários</SidebarNavLink>
             <SidebarNavLink href="/admin/saidas">Motivos de Saída</SidebarNavLink>
           </>
@@ -68,14 +72,10 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-4 py-4 border-t border-neutral-200 text-sm">
-        <div className="mb-2 flex items-center gap-1.5 text-xs text-neutral-400">
-          <span
-            className={`inline-block w-1.5 h-1.5 rounded-full ${
-              syncAtivo === true ? "bg-emerald-500" : syncAtivo === false ? "bg-neutral-300" : "bg-neutral-200"
-            }`}
-          />
+        {isAdminGeral(user) && <div className="mb-2 flex items-center gap-1.5 text-xs text-neutral-400">
+          <span className={`inline-block h-1.5 w-1.5 rounded-full ${syncAtivo === true ? "bg-emerald-500" : syncAtivo === false ? "bg-neutral-300" : "bg-neutral-200"}`} />
           {syncAtivo === true ? "Sincronização automática ativa" : syncAtivo === false ? "Sincronização não configurada" : "Verificando sincronização..."}
-        </div>
+        </div>}
         <div className="mb-2 text-neutral-700">
           {user.nome} <span className="block text-xs uppercase text-neutral-400">{user.papel}</span>
         </div>
