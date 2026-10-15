@@ -1,6 +1,6 @@
 "use client";
 
-import { mutateDb, novoId } from "./store";
+import { getDb, mutateDb, novoId } from "./store";
 import type { Database, NivelRisco } from "./types";
 
 function media(valores: number[]) {
@@ -13,6 +13,66 @@ function classificarRisco(scoreSaudeGeral: number): NivelRisco {
   if (scoreSaudeGeral >= 6) return "MEDIO";
   if (scoreSaudeGeral >= 4) return "ALTO";
   return "CRITICO";
+}
+
+export interface ResumoSaudeProjeto {
+  projetoId: string;
+  cicloId: string | null;
+  scoreSaudeGeral: number | null;
+  nivelRisco: NivelRisco | null;
+  clientesCalculados: number;
+  totalClientes: number;
+}
+
+/**
+ * Consolida a saúde do projeto a partir dos health scores dos clientes no
+ * mesmo ciclo. A média é calculada somente com clientes que já possuem
+ * score, evitando que clientes sem resposta derrubem artificialmente o
+ * resultado do projeto.
+ */
+export function obterResumoSaudeProjeto(
+  db: Database,
+  projetoId: string,
+  cicloId?: string
+): ResumoSaudeProjeto {
+  const ciclos = db.ciclosAvaliacao
+    .filter((c) => c.projetoId === projetoId)
+    .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime());
+  const ciclo = cicloId ? ciclos.find((c) => c.id === cicloId) : ciclos[0];
+  const clientes = db.clientes.filter((c) => c.projetoId === projetoId);
+  const riscos = ciclo
+    ? db.riscosChurn.filter((r) => r.projetoId === projetoId && r.cicloId === ciclo.id)
+    : [];
+  const score = media(riscos.map((r) => r.scoreSaudeGeral));
+
+  return {
+    projetoId,
+    cicloId: ciclo?.id ?? null,
+    scoreSaudeGeral: score,
+    nivelRisco: score === null ? null : classificarRisco(score),
+    clientesCalculados: riscos.length,
+    totalClientes: clientes.length,
+  };
+}
+
+/** Calcula todos os clientes com dados no ciclo e retorna o resumo do projeto. */
+export function calcularSaudeProjeto(projetoId: string, cicloId: string) {
+  const db = getDb();
+  const clientes = db.clientes.filter((c) => c.projetoId === projetoId);
+  const ciclo = db.ciclosAvaliacao.find((c) => c.id === cicloId && c.projetoId === projetoId);
+  if (!ciclo) throw new Error("Ciclo não encontrado para este projeto");
+
+  let calculados = 0;
+  for (const cliente of clientes) {
+    try {
+      calcularRiscoChurn(cicloId, cliente.id);
+      calculados++;
+    } catch {
+      // Clientes sem respostas permanecem sem score e não entram na média.
+    }
+  }
+  if (calculados === 0) throw new Error("Nenhum cliente possui respostas ou metas neste ciclo");
+  return obterResumoSaudeProjeto(getDb(), projetoId, cicloId);
 }
 
 // Peso igual (50/50) entre polo ativo (NPS do cliente) e polo passivo (avaliação da equipe),

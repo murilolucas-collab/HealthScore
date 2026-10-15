@@ -10,7 +10,7 @@ import { useRouter, usePathname } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { getDb } from "./store";
 import { sincronizarNaInicializacao } from "./github-sync";
-import type { PapelUsuario } from "./types";
+import type { ModuloUsuario, PapelUsuario, Usuario } from "./types";
 
 const SESSION_KEY = "calculadora-churn-session-v1";
 
@@ -19,6 +19,32 @@ export interface SessionUser {
   nome: string;
   email: string;
   papel: PapelUsuario;
+}
+
+export const PERMISSOES_PADRAO: Record<ModuloUsuario, boolean> = {
+  verDashboard: true,
+  verProjetos: true,
+  verClientes: true,
+  gerenciarClientes: false,
+  alterarStatusCliente: false,
+  calcularSaude: true,
+};
+
+export function isAdminGeral(user: Pick<SessionUser, "nome" | "email" | "papel">) {
+  return user.papel === "ADMIN" && (user.nome.trim().toLowerCase() === "admin geral" || user.email.toLowerCase() === "admin@agencia.com");
+}
+
+export function permissoesEfetivas(usuario: Pick<Usuario, "papel" | "permissoes">): Record<ModuloUsuario, boolean> {
+  if (usuario.papel === "ADMIN") {
+    return { verDashboard: true, verProjetos: true, verClientes: true, gerenciarClientes: true, alterarStatusCliente: true, calcularSaude: true };
+  }
+  return { ...PERMISSOES_PADRAO, ...(usuario.permissoes ?? {}) };
+}
+
+export function temPermissao(user: SessionUser, modulo: ModuloUsuario) {
+  if (user.papel === "ADMIN") return true;
+  const usuario = getDb().usuarios.find((u) => u.id === user.id);
+  return permissoesEfetivas(usuario ?? { papel: user.papel })[modulo];
 }
 
 interface AuthContextValue {

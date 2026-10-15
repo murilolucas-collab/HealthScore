@@ -42,12 +42,23 @@ export type MotivoSaida =
   | "PROBLEMAS_INTERNOS_AGENCIA"
   | "OUTRO";
 
+export type ModuloUsuario =
+  | "verDashboard"
+  | "verProjetos"
+  | "verClientes"
+  | "gerenciarClientes"
+  | "alterarStatusCliente"
+  | "calcularSaude";
+
+export type PermissoesUsuario = Partial<Record<ModuloUsuario, boolean>>;
+
 export interface Usuario {
   id: string;
   nome: string;
   email: string;
   senhaHash: string;
   papel: PapelUsuario;
+  permissoes?: PermissoesUsuario;
   criadoEm: string;
 }
 
