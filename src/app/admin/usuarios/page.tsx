@@ -39,6 +39,7 @@ export default function UsuariosPage() {
         .map((a) => db.projetos.find((p) => p.id === a.projetoId))
         .filter(Boolean),
     }));
+  const projetosDisponiveis = db.projetos.slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -78,6 +79,26 @@ export default function UsuariosPage() {
     mutateDb((dbW) => {
       const usuario = dbW.usuarios.find((u) => u.id === usuarioId);
       if (usuario && usuario.papel === "PADRAO") usuario.permissoes = permissoes;
+    });
+  }
+
+  function handleAcessosProjeto(e: React.FormEvent<HTMLFormElement>, usuarioId: string) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const projetosSelecionados = projetosDisponiveis.filter(
+      (projeto) => formData.get(`projeto_${projeto.id}`) === "on"
+    );
+
+    mutateDb((dbW) => {
+      dbW.acessosProjeto = dbW.acessosProjeto.filter((acesso) => acesso.usuarioId !== usuarioId);
+      for (const projeto of projetosSelecionados) {
+        dbW.acessosProjeto.push({
+          id: novoId("acesso"),
+          usuarioId,
+          projetoId: projeto.id,
+          criadoEm: new Date().toISOString(),
+        });
+      }
     });
   }
 
@@ -148,6 +169,30 @@ export default function UsuariosPage() {
                     </label>
                   ))}
                   <button className="col-span-2 mt-1 text-left text-[11px] font-medium text-neutral-700 underline">Salvar módulos</button>
+                </form>
+              )}
+              {u.papel === "PADRAO" && (
+                <form onSubmit={(e) => handleAcessosProjeto(e, u.id)} className="w-full rounded-md border border-neutral-200 bg-white p-2">
+                  <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+                    Projetos que este usuário pode acessar
+                  </p>
+                  {projetosDisponiveis.length > 0 ? (
+                    <div className="grid gap-1 sm:grid-cols-2">
+                      {projetosDisponiveis.map((projeto) => (
+                        <label key={projeto.id} className="flex items-center gap-1 text-[11px] text-neutral-600">
+                          <input
+                            type="checkbox"
+                            name={`projeto_${projeto.id}`}
+                            defaultChecked={u.acessos.some((acesso) => acesso?.id === projeto.id)}
+                          />
+                          {projeto.nome}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-neutral-500">Nenhum projeto cadastrado.</p>
+                  )}
+                  <button className="mt-2 text-left text-[11px] font-medium text-neutral-700 underline">Salvar projetos</button>
                 </form>
               )}
               <button
