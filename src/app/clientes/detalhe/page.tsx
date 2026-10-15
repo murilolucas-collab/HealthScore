@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { mutateDb, novoId, excluirCliente } from "@/lib/store";
+import { getDb, mutateDb, novoId, excluirCliente } from "@/lib/store";
+import { salvarDbRemoto } from "@/lib/github-sync";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 import type { TipoEvento, StatusCliente } from "@/lib/types";
 
@@ -37,6 +39,7 @@ export default function ClienteDetalhePage() {
   const router = useRouter();
   const { user, pronto } = useAuth();
   const db = useDb();
+  const [statusSalvo, setStatusSalvo] = useState(false);
 
   if (!pronto || !db || !user) return null;
   if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
@@ -158,6 +161,8 @@ export default function ClienteDetalhePage() {
       const c = dbW.clientes.find((cl) => cl.id === id);
       if (c) c.status = status;
     });
+    setStatusSalvo(true);
+    void salvarDbRemoto(getDb());
   }
 
   function handleExcluir() {
@@ -206,11 +211,12 @@ export default function ClienteDetalhePage() {
           <>
             {podeAlterarStatus ? <form onSubmit={handleStatus} className="flex items-center gap-2">
               <label className="text-sm text-neutral-600">Status do cliente:</label>
-              <select name="status" defaultValue={cliente.status} className="rounded-md border border-neutral-300 px-2 py-1 text-sm">
+              <select name="status" value={cliente.status} onChange={() => setStatusSalvo(false)} className="rounded-md border border-neutral-300 px-2 py-1 text-sm">
                 <option value="ATIVO">Ativo</option>
                 <option value="EM_RISCO">Em risco</option>
               </select>
               <button className="text-sm underline text-neutral-600 hover:text-neutral-900">Salvar</button>
+              {statusSalvo && <span className="text-xs text-emerald-700">Status salvo</span>}
             </form> : <span className="text-sm text-neutral-500">Status do cliente: {cliente.status === "EM_RISCO" ? "Em risco" : "Ativo"}</span>}
             {podeGerenciar && <Link href={`/clientes/saida?id=${cliente.id}`} className="text-sm text-red-600 underline hover:text-red-800">Encerrar cliente (registrar saída)</Link>}
           </>
