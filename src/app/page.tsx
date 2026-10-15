@@ -5,6 +5,7 @@ import { useAuth, getProjetoIdsDoUsuario } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { Card, StatusBadge, RiscoBadge, CategoriaLabel } from "@/components/ui";
 import type { NivelRisco } from "@/lib/types";
+import { obterResumoSaudeProjeto } from "@/lib/churn";
 
 const ORDEM_RISCO: NivelRisco[] = ["CRITICO", "ALTO", "MEDIO", "BAIXO"];
 
@@ -61,9 +62,16 @@ export default function Home() {
         csResponsavel: db.usuarios.find((u) => u.id === p.csResponsavelId) ?? null,
         totalClientes: clientesDoProjeto.length,
         contagem,
+        saude: obterResumoSaudeProjeto(db, p.id),
       };
     })
     .sort((a, b) => a.nome.localeCompare(b.nome));
+
+  const contagemStatus = {
+    ATIVO: clientes.filter((c) => c.status === "ATIVO").length,
+    EM_RISCO: clientes.filter((c) => c.status === "EM_RISCO").length,
+    INATIVO: db.clientes.filter((c) => projetoIdsVisiveis.has(c.projetoId) && c.status === "INATIVO").length,
+  };
 
   const porCS = new Map<string, { nome: string; totalClientes: number; contagem: Record<string, number> }>();
   if (isAdmin) {
@@ -113,6 +121,20 @@ export default function Home() {
         ))}
       </div>
 
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-medium text-neutral-900">Status dos clientes</h2>
+            <p className="text-xs text-neutral-500">O status manual continua visível mesmo antes do primeiro ciclo de saúde.</p>
+          </div>
+          <div className="flex gap-4 text-sm">
+            <span><strong>{contagemStatus.ATIVO}</strong> ativos</span>
+            <span className="text-orange-700"><strong>{contagemStatus.EM_RISCO}</strong> em risco</span>
+            <span className="text-neutral-500"><strong>{contagemStatus.INATIVO}</strong> inativos</span>
+          </div>
+        </div>
+      </Card>
+
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <div className="flex items-center justify-between mb-3">
@@ -127,7 +149,7 @@ export default function Home() {
             {clientesEmDestaque.map((c) => (
               <Link
                 key={c.id}
-                href={isAdmin ? `/clientes/detalhe?id=${c.id}` : "#"}
+                href={isAdmin ? `/clientes/detalhe?id=${c.id}` : `/projetos/detalhe?id=${c.projetoId}`}
                 className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400"
               >
                 <div>
@@ -163,6 +185,8 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={p.status} />
+                  {p.saude.scoreSaudeGeral !== null && <span className="text-sm font-medium text-neutral-700">Saúde {p.saude.scoreSaudeGeral.toFixed(1)}</span>}
+                  {p.saude.scoreSaudeGeral === null && <RiscoBadge nivel={undefined} />}
                   {ORDEM_RISCO.filter((n) => p.contagem[n] > 0).map((n) => (
                     <span key={n} className="text-xs text-neutral-500">
                       {p.contagem[n]} <RiscoBadge nivel={n} />
