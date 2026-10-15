@@ -39,6 +39,11 @@ export default function CicloRosterPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 text-sm text-neutral-500">
+        <Link href={`/projetos/detalhe?id=${projetoId}`} className="hover:text-neutral-900 hover:underline">{projeto.nome}</Link>
+        <span aria-hidden="true">/</span>
+        <span className="text-neutral-900">Ciclo</span>
+      </div>
       <div>
         <h1 className="text-lg font-semibold text-neutral-900">
           {projeto.nome} · Ciclo {format(new Date(ciclo.dataInicio), "dd/MM/yyyy", { locale: ptBR })}
