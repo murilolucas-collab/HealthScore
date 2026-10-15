@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAuth, podeAcessarProjeto } from "@/lib/auth-client";
+import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId } from "@/lib/store";
 import { calcularRiscoChurn } from "@/lib/churn";
@@ -67,6 +68,7 @@ export default function CicloClienteDetalhePage() {
   if (!cliente) return <p className="text-sm text-neutral-500">Cliente não encontrado neste projeto.</p>;
 
   const projeto = db.projetos.find((p) => p.id === projetoId)!;
+  const podeCalcularSaude = temPermissao(user, "calcularSaude");
   const contatos = db.contatosCliente.filter((c) => c.clienteId === clienteId);
   const metasAtivas = db.metasCliente.filter((m) => m.clienteId === clienteId && m.ativa);
   const riscoChurn = db.riscosChurn.find((r) => r.cicloId === cicloId && r.clienteId === clienteId);
@@ -121,6 +123,7 @@ export default function CicloClienteDetalhePage() {
         });
       }
     });
+    recalcularAutomaticamente();
   }
 
   function handleRespostasPassivas(e: React.FormEvent<HTMLFormElement>) {
@@ -148,6 +151,7 @@ export default function CicloClienteDetalhePage() {
         });
       }
     });
+    recalcularAutomaticamente();
   }
 
   async function handleImportarCSV(e: React.FormEvent<HTMLFormElement>) {
@@ -193,6 +197,7 @@ export default function CicloClienteDetalhePage() {
         });
       }
     });
+    recalcularAutomaticamente();
     e.currentTarget.reset();
   }
 
@@ -225,9 +230,11 @@ export default function CicloClienteDetalhePage() {
           });
       }
     });
+    recalcularAutomaticamente();
   }
 
   function handleCalcular() {
+    if (!podeCalcularSaude) return;
     try {
       calcularRiscoChurn(cicloId, clienteId);
     } catch (err) {
@@ -235,8 +242,24 @@ export default function CicloClienteDetalhePage() {
     }
   }
 
+  function recalcularAutomaticamente() {
+    if (!podeCalcularSaude) return;
+    try {
+      calcularRiscoChurn(cicloId, clienteId);
+    } catch {
+      // Sem dados suficientes ainda: o usuário poderá calcular depois.
+    }
+  }
+
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-500">
+        <Link href={`/projetos/detalhe?id=${projetoId}`} className="hover:text-neutral-900 hover:underline">{projeto.nome}</Link>
+        <span aria-hidden="true">/</span>
+        <Link href={`/projetos/ciclo?projetoId=${projetoId}&cicloId=${cicloId}`} className="hover:text-neutral-900 hover:underline">Ciclo</Link>
+        <span aria-hidden="true">/</span>
+        <span className="text-neutral-900">{cliente.nome}</span>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">
@@ -253,9 +276,9 @@ export default function CicloClienteDetalhePage() {
       <Card>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-medium text-neutral-900">Risco de churn deste cliente</h2>
-          <button onClick={handleCalcular} className="bg-neutral-900 text-white rounded-md px-3 py-1.5 text-sm hover:bg-neutral-800">
+          {podeCalcularSaude && <button onClick={handleCalcular} className="bg-neutral-900 text-white rounded-md px-3 py-1.5 text-sm hover:bg-neutral-800">
             {riscoChurn ? "Recalcular" : "Calcular risco de churn"}
-          </button>
+          </button>}
         </div>
         {riscoChurn ? (
           <>
