@@ -38,14 +38,24 @@ const STATUS_STYLES: Record<string, string> = {
   ENCERRADO: "bg-neutral-100 text-neutral-600 border-neutral-200",
   ABERTO: "bg-blue-50 text-blue-800 border-blue-200",
   FECHADO: "bg-neutral-100 text-neutral-600 border-neutral-200",
-}
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  ATIVO: "Ativo",
+  EM_RISCO: "Em risco",
+  INATIVO: "Inativo",
+  PAUSADO: "Pausado",
+  ENCERRADO: "Encerrado",
+  ABERTO: "Aberto",
+  FECHADO: "Fechado",
+};
 
 export function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[status] ?? "bg-neutral-100 text-neutral-600 border-neutral-200"}`}
     >
-      {status}
+      {STATUS_LABELS[status] ?? status}
     </span>
   );
 }
