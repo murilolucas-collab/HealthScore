@@ -110,7 +110,7 @@ export default function ProjetoDetalhePage() {
         criadoEm: new Date().toISOString(),
       });
     });
-    window.location.href = `/projetos/ciclo?projetoId=${id}&cicloId=${cicloId}`;
+    router.push(`/projetos/ciclo?projetoId=${id}&cicloId=${cicloId}`);
   }
 
   function handleIndicador(e: React.FormEvent<HTMLFormElement>) {
