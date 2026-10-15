@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAuth, podeAcessarProjeto } from "@/lib/auth-client";
+import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId, excluirProjeto, excluirCliente } from "@/lib/store";
+import { calcularSaudeProjeto, obterResumoSaudeProjeto } from "@/lib/churn";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 import type { Periodicidade } from "@/lib/types";
 
@@ -34,6 +35,7 @@ export default function ProjetoDetalhePage() {
   if (!podeAcessarProjeto(user, id)) return <p className="text-sm text-neutral-500">Sem acesso a este projeto.</p>;
 
   const isAdmin = user.papel === "ADMIN";
+  const podeCalcularSaude = temPermissao(user, "calcularSaude");
   const configuracaoCiclo = db.configuracoesCiclo.find((c) => c.projetoId === id);
   const csResponsavel = db.usuarios.find((u) => u.id === projeto.csResponsavelId);
   const acessos = db.acessosProjeto
@@ -43,6 +45,7 @@ export default function ProjetoDetalhePage() {
   const ciclos = db.ciclosAvaliacao
     .filter((c) => c.projetoId === id)
     .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime());
+  const resumoSaude = obterResumoSaudeProjeto(db, id);
   const indicadores = db.indicadoresDesempenho
     .filter((i) => i.projetoId === id)
     .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm))
@@ -72,8 +75,24 @@ export default function ProjetoDetalhePage() {
       if (cfg) {
         cfg.periodicidade = periodicidade;
         cfg.diaDisparo = diaDisparo;
+      } else {
+        dbW.configuracoesCiclo.push({ id: novoId("config"), projetoId: id, periodicidade, diaDisparo, ativo: true });
       }
     });
+  }
+
+  function handleCalcularSaudeProjeto() {
+    if (!podeCalcularSaude) return;
+    const ciclo = ciclos[0];
+    if (!ciclo) {
+      alert("Abra um ciclo de avaliação antes de calcular a saúde do projeto.");
+      return;
+    }
+    try {
+      calcularSaudeProjeto(id, ciclo.id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Não foi possível calcular a saúde do projeto");
+    }
   }
 
   function abrirNovoCiclo() {
@@ -167,6 +186,11 @@ export default function ProjetoDetalhePage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 text-sm text-neutral-500">
+        <Link href="/projetos" className="hover:text-neutral-900 hover:underline">Projetos</Link>
+        <span aria-hidden="true">/</span>
+        <span className="text-neutral-900">{projeto.nome}</span>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">{projeto.nome}</h1>
@@ -182,6 +206,22 @@ export default function ProjetoDetalhePage() {
               Excluir projeto
             </button>
           )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-5">
+        <div>
+          <h2 className="font-medium text-neutral-900">Saúde do projeto</h2>
+          <p className="text-xs text-neutral-500">
+            {resumoSaude.cicloId ? `${resumoSaude.clientesCalculados} de ${resumoSaude.totalClientes} cliente(s) calculado(s) no último ciclo.` : "Abra um ciclo e registre respostas para calcular."}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {resumoSaude.scoreSaudeGeral !== null && <span className="text-2xl font-semibold text-neutral-900">{resumoSaude.scoreSaudeGeral.toFixed(1)}/10</span>}
+          <RiscoBadge nivel={resumoSaude.nivelRisco ?? undefined} />
+          {podeCalcularSaude && <button onClick={handleCalcularSaudeProjeto} className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white hover:bg-neutral-800">
+            {resumoSaude.scoreSaudeGeral === null ? "Calcular saúde" : "Recalcular saúde"}
+          </button>}
         </div>
       </div>
 
