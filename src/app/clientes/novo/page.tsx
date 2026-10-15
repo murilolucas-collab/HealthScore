@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId } from "@/lib/store";
 import { Card } from "@/components/ui";
@@ -14,11 +14,10 @@ export default function NovoClientePage() {
   const projetoIdPreSelecionado = searchParams.get("projetoId") ?? "";
 
   if (!pronto || !db || !user) return null;
-  if (user.papel !== "ADMIN") {
-    return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
-  }
+  if (!temPermissao(user, "gerenciarClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para gerenciar clientes.</p>;
 
-  const projetos = db.projetos.slice().sort((a, b) => a.nome.localeCompare(b.nome));
+  const projetosPermitidos = user.papel === "ADMIN" ? null : new Set(getProjetoIdsDoUsuario(user.id));
+  const projetos = db.projetos.filter((p) => !projetosPermitidos || projetosPermitidos.has(p.id)).slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
