@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, excluirCliente } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
@@ -14,9 +14,9 @@ export default function ClientesPage() {
   const [filtroProjeto, setFiltroProjeto] = useState("");
 
   if (!pronto || !db || !user) return null;
-  if (user.papel !== "ADMIN") {
-    return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
-  }
+  if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
+  const podeGerenciar = temPermissao(user, "gerenciarClientes");
+  const projetosPermitidos = user.papel === "ADMIN" ? null : new Set(getProjetoIdsDoUsuario(user.id));
 
   function handleExcluir(clienteId: string, nome: string) {
     const confirmado = window.confirm(
@@ -26,11 +26,11 @@ export default function ClientesPage() {
     mutateDb((dbW) => excluirCliente(dbW, clienteId));
   }
 
-  const projetos = db.projetos.slice().sort((a, b) => a.nome.localeCompare(b.nome));
+  const projetos = db.projetos.filter((p) => !projetosPermitidos || projetosPermitidos.has(p.id)).slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   const termoBusca = busca.trim().toLowerCase();
   const clientes = db.clientes
-    .filter((c) => (filtroProjeto ? c.projetoId === filtroProjeto : true))
+    .filter((c) => (!projetosPermitidos || projetosPermitidos.has(c.projetoId)) && (filtroProjeto ? c.projetoId === filtroProjeto : true))
     .filter((c) => (termoBusca ? c.nome.toLowerCase().includes(termoBusca) : true))
     .slice()
     .sort((a, b) => a.nome.localeCompare(b.nome))
@@ -48,9 +48,7 @@ export default function ClientesPage() {
         <h1 className="text-lg font-semibold text-neutral-900">
           Clientes <span className="text-sm font-normal text-neutral-400">({clientes.length})</span>
         </h1>
-        <Link href="/clientes/novo" className="bg-neutral-900 text-white text-sm px-4 py-2 rounded-md hover:bg-neutral-800">
-          + Novo cliente
-        </Link>
+        {podeGerenciar && <Link href="/clientes/novo" className="bg-neutral-900 text-white text-sm px-4 py-2 rounded-md hover:bg-neutral-800">+ Novo cliente</Link>}
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -86,12 +84,7 @@ export default function ClientesPage() {
             <div className="flex items-center gap-3 shrink-0">
               <StatusBadge status={cliente.status} />
               <RiscoBadge nivel={risco?.nivelRisco} />
-              <button
-                onClick={() => handleExcluir(cliente.id, cliente.nome)}
-                className="text-xs text-red-600 underline hover:text-red-800"
-              >
-                Excluir
-              </button>
+              {podeGerenciar && <button onClick={() => handleExcluir(cliente.id, cliente.nome)} className="text-xs text-red-600 underline hover:text-red-800">Excluir</button>}
             </div>
           </Card>
         ))}
