@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth-client";
+import { useAuth, isAdminGeral } from "@/lib/auth-client";
 import { getDb, substituirDb } from "@/lib/store";
 import { buscarDbRemoto, salvarDbRemoto } from "@/lib/github-sync";
 import { Card } from "@/components/ui";
@@ -27,6 +27,7 @@ export default function GithubStatusPage() {
   }, []);
 
   if (!pronto || !user) return null;
+  if (!isAdminGeral(user)) return <p className="text-sm text-neutral-500">Ação restrita ao Admin Geral.</p>;
 
   async function handleCarregarAgora() {
     setCarregando("carregando");
