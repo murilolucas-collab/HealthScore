@@ -25,7 +25,14 @@
       "criadoEm": "2026-10-16T12:13:50.965Z"
     }
   ],
-  "acessosProjeto": [],
+  "acessosProjeto": [
+    {
+      "id": "acesso_cc3ceba0-cc8f-4de6-8ff9-ddfb37342aca",
+      "usuarioId": "usuario_90a12043-0802-40e5-bd5d-42ffbdb1cec5",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "criadoEm": "2026-10-16T12:27:56.456Z"
+    }
+  ],
   "clientes": [
     {
       "id": "cliente_cc7efc11-226f-4ac5-91d6-14c3dfcb8a82",
