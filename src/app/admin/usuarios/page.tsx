@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth, permissoesEfetivas } from "@/lib/auth-client";
+import { isAdminGeral, useAuth, permissoesEfetivas } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId, excluirUsuario } from "@/lib/store";
 import { Card } from "@/components/ui";
@@ -78,7 +78,7 @@ export default function UsuariosPage() {
     const permissoes = permissoesDoFormulario(new FormData(e.currentTarget));
     mutateDb((dbW) => {
       const usuario = dbW.usuarios.find((u) => u.id === usuarioId);
-      if (usuario && usuario.papel === "PADRAO") usuario.permissoes = permissoes;
+      if (usuario && !isAdminGeral(usuario)) usuario.permissoes = permissoes;
     });
   }
 
@@ -132,7 +132,7 @@ export default function UsuariosPage() {
             <option value="ADMIN">Admin</option>
           </select>
           <div className="md:col-span-4 rounded-md border border-neutral-200 bg-neutral-50 p-3">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Módulos do usuário padrão</p>
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Permissões iniciais deste usuário</p>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {MODULOS.map(({ chave, titulo }) => (
                 <label key={chave} className="flex items-center gap-2 text-xs text-neutral-700">
@@ -160,7 +160,7 @@ export default function UsuariosPage() {
             </div>
             <div className="flex flex-col items-end gap-2">
               <span className="text-xs uppercase text-neutral-400">{u.papel}</span>
-              {u.papel === "PADRAO" && (
+              {!isAdminGeral(u) && (
                 <form onSubmit={(e) => handlePermissoes(e, u.id)} className="grid grid-cols-2 gap-x-3 gap-y-1 rounded-md border border-neutral-200 bg-neutral-50 p-2">
                   {MODULOS.map(({ chave, titulo }) => (
                     <label key={chave} className="flex items-center gap-1 text-[11px] text-neutral-600">
@@ -170,6 +170,11 @@ export default function UsuariosPage() {
                   ))}
                   <button className="col-span-2 mt-1 text-left text-[11px] font-medium text-neutral-700 underline">Salvar módulos</button>
                 </form>
+              )}
+              {isAdminGeral(u) && (
+                <p className="max-w-xs text-right text-[11px] text-neutral-500">
+                  Admin Geral: todos os módulos e a sincronização GitHub ficam sempre liberados.
+                </p>
               )}
               {u.papel === "PADRAO" && (
                 <form onSubmit={(e) => handleAcessosProjeto(e, u.id)} className="w-full rounded-md border border-neutral-200 bg-white p-2">
