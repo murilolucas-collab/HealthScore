@@ -44,7 +44,7 @@
       "cnpj": "000.000.000.000-1.00",
       "segmento": "123",
       "inicioContrato": "2026-10-05",
-      "status": "ATIVO",
+      "status": "EM_RISCO",
       "criadoEm": "2026-10-05T12:29:28.565Z"
     },
     {
