@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth, getProjetoIdsDoUsuario } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, excluirProjeto } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
@@ -13,6 +13,9 @@ export default function ProjetosPage() {
   const db = useDb();
 
   if (!pronto || !db || !user) return null;
+  if (!temPermissao(user, "verProjetos")) {
+    return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar projetos.</p>;
+  }
 
   const isAdmin = user.papel === "ADMIN";
   const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
