@@ -13,6 +13,9 @@ export default function Sidebar() {
   const [syncAtivo, setSyncAtivo] = useState<boolean | null>(null);
 
   useEffect(() => {
+    if (!isAdminGeral(user ?? { nome: "", email: "", papel: "PADRAO" })) {
+      return;
+    }
     let cancelado = false;
     buscarDbRemoto().then((resultado) => {
       if (!cancelado) setSyncAtivo(resultado.existe !== null);
@@ -20,7 +23,7 @@ export default function Sidebar() {
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [user]);
 
   if (!user || !db) return null;
 
@@ -49,9 +52,9 @@ export default function Sidebar() {
         {isAdminGeral(user) && (
           <SidebarNavLink href="/admin/github">Sincronização GitHub</SidebarNavLink>
         )}
+        {podeClientes && <SidebarNavLink href="/clientes">Clientes</SidebarNavLink>}
         {isAdmin && (
           <>
-            {podeClientes && <SidebarNavLink href="/clientes">Clientes</SidebarNavLink>}
             <SidebarNavLink href="/admin/usuarios">Usuários</SidebarNavLink>
             <SidebarNavLink href="/admin/saidas">Motivos de Saída</SidebarNavLink>
           </>
