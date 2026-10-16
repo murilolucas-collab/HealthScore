@@ -29,6 +29,9 @@ export default function ProjetoDetalhePage() {
   const [buscaCliente, setBuscaCliente] = useState("");
 
   if (!pronto || !db || !user) return null;
+  if (!temPermissao(user, "verProjetos")) {
+    return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar projetos.</p>;
+  }
 
   const projeto = db.projetos.find((p) => p.id === id);
   if (!projeto) return <p className="text-sm text-neutral-500">Projeto não encontrado.</p>;
