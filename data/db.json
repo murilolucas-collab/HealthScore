@@ -172,6 +172,16 @@
       "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataOcorrencia": "2026-10-15T12:11:24.394Z",
       "criadoEm": "2026-10-15T12:11:24.394Z"
+    },
+    {
+      "id": "evento_72931197-ca41-414b-a602-6247fdde98cd",
+      "clienteId": "cliente_a8878c41-eaf2-48b0-8953-2856ec35a2ed",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "tipo": "RECLAMACAO",
+      "descricao": "Suporte ruim",
+      "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataOcorrencia": "2026-10-16T13:13:33.676Z",
+      "criadoEm": "2026-10-16T13:13:33.676Z"
     }
   ],
   "perfisRisco": [
