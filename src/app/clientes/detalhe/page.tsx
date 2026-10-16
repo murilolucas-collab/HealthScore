@@ -40,6 +40,8 @@ export default function ClienteDetalhePage() {
   const { user, pronto } = useAuth();
   const db = useDb();
   const [statusSalvo, setStatusSalvo] = useState(false);
+  const [salvandoStatus, setSalvandoStatus] = useState(false);
+  const [erroStatus, setErroStatus] = useState("");
 
   if (!pronto || !db || !user) return null;
   if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
@@ -152,17 +154,30 @@ export default function ClienteDetalhePage() {
     });
   }
 
-  function handleStatus(e: React.FormEvent<HTMLFormElement>) {
+  async function handleStatus(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!podeAlterarStatus) return;
+    if (!podeAlterarStatus || salvandoStatus) return;
     const formData = new FormData(e.currentTarget);
     const status = String(formData.get("status") ?? "ATIVO") as StatusCliente;
+    setSalvandoStatus(true);
+    setStatusSalvo(false);
+    setErroStatus("");
     mutateDb((dbW) => {
       const c = dbW.clientes.find((cl) => cl.id === id);
       if (c) c.status = status;
     });
-    setStatusSalvo(true);
-    void salvarDbRemoto(getDb());
+    try {
+      const resultado = await salvarDbRemoto(getDb());
+      if (!resultado.ok) {
+        setErroStatus(`O status foi alterado neste navegador, mas não foi possível salvar no servidor: ${resultado.erro}`);
+        return;
+      }
+      setStatusSalvo(true);
+    } catch {
+      setErroStatus("O status foi alterado neste navegador, mas não foi possível salvar no servidor. Tente novamente.");
+    } finally {
+      setSalvandoStatus(false);
+    }
   }
 
   function handleExcluir() {
@@ -211,12 +226,13 @@ export default function ClienteDetalhePage() {
           <>
             {podeAlterarStatus ? <form onSubmit={handleStatus} className="flex items-center gap-2">
               <label className="text-sm text-neutral-600">Status do cliente:</label>
-              <select name="status" value={cliente.status} onChange={() => setStatusSalvo(false)} className="rounded-md border border-neutral-300 px-2 py-1 text-sm">
+              <select name="status" value={cliente.status} onChange={() => { setStatusSalvo(false); setErroStatus(""); }} disabled={salvandoStatus} className="rounded-md border border-neutral-300 px-2 py-1 text-sm disabled:opacity-60">
                 <option value="ATIVO">Ativo</option>
                 <option value="EM_RISCO">Em risco</option>
               </select>
-              <button className="text-sm underline text-neutral-600 hover:text-neutral-900">Salvar</button>
-              {statusSalvo && <span className="text-xs text-emerald-700">Status salvo</span>}
+              <button disabled={salvandoStatus} className="text-sm underline text-neutral-600 hover:text-neutral-900 disabled:opacity-60">{salvandoStatus ? "Salvando…" : "Salvar"}</button>
+              {statusSalvo && <span role="status" className="text-xs text-emerald-700">Status salvo</span>}
+              {erroStatus && <span role="alert" className="text-xs text-red-700">{erroStatus}</span>}
             </form> : <span className="text-sm text-neutral-500">Status do cliente: {cliente.status === "EM_RISCO" ? "Em risco" : "Ativo"}</span>}
             {podeGerenciar && <Link href={`/clientes/saida?id=${cliente.id}`} className="text-sm text-red-600 underline hover:text-red-800">Encerrar cliente (registrar saída)</Link>}
           </>
