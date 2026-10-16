@@ -64,6 +64,8 @@ export default function Home() {
         ...p,
         csResponsavel: db.usuarios.find((u) => u.id === p.csResponsavelId) ?? null,
         totalClientes: clientesDoProjeto.length,
+        clientesAtivos: clientesDoProjeto.filter((c) => c.status === "ATIVO").length,
+        clientesEmRisco: clientesDoProjeto.filter((c) => c.status === "EM_RISCO").length,
         contagem,
         saude: obterResumoSaudeProjeto(db, p.id),
       };
@@ -147,7 +149,7 @@ export default function Home() {
           <div className="flex items-center justify-between mb-3">
             <div><h2 className="font-semibold">Clientes em maior risco</h2><p className="mb-0 mt-1 text-xs text-neutral-500">Priorize o contato com quem precisa de atenção.</p></div>
             {isAdmin && (
-              <Link href="/clientes" className="text-xs underline text-neutral-500 hover:text-neutral-900">
+              <Link href="/clientes" className="inline-action inline-action-secondary">
                 ver todos
               </Link>
             )}
@@ -157,7 +159,7 @@ export default function Home() {
               <Link
                 key={c.id}
                 href={isAdmin ? `/clientes/detalhe?id=${c.id}` : `/projetos/detalhe?id=${c.projetoId}`}
-                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-3 hover:border-neutral-400"
+                className="action-card-link flex items-center justify-between rounded-md border border-neutral-200 px-3 py-3 hover:border-neutral-400"
               >
                 <div>
                   <div className="text-sm text-neutral-800">{c.nome}</div>
@@ -175,7 +177,7 @@ export default function Home() {
         <Card>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-medium text-neutral-900">Risco por projeto</h2>
-            <Link href="/projetos" className="text-xs underline text-neutral-500 hover:text-neutral-900">
+            <Link href="/projetos" className="inline-action inline-action-secondary">
               ver todos
             </Link>
           </div>
@@ -184,11 +186,13 @@ export default function Home() {
               <Link
                 key={p.id}
                 href={`/projetos/detalhe?id=${p.id}`}
-                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-3 hover:border-neutral-400"
+                className="action-card-link flex items-center justify-between rounded-md border border-neutral-200 px-3 py-3 hover:border-neutral-400"
               >
                 <div>
                   <div className="text-sm text-neutral-800">{p.nome}</div>
-                  <div className="text-xs text-neutral-500">{p.totalClientes} cliente(s) ativo(s)</div>
+                  <div className="text-xs text-neutral-500">
+                    {p.clientesAtivos} {p.clientesAtivos === 1 ? "ativo" : "ativos"} · {p.clientesEmRisco} em risco
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={p.status} />

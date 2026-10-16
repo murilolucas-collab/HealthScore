@@ -41,7 +41,7 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-neutral-700">Senha
               <input type="password" name="senha" autoComplete="current-password" required className="mt-2 w-full" placeholder="Sua senha" />
             </label>
-            <button type="submit" disabled={!pronto} className="w-full bg-neutral-900 py-3 text-sm">
+            <button type="submit" disabled={!pronto} className="action-button action-primary w-full">
               {!pronto ? "Preparando acesso…" : "Entrar no HealthScore"}
             </button>
           </form>

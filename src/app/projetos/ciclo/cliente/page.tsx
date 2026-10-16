@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,6 +26,78 @@ const PILARES = [
   "DEMANDA_QUANTIDADE",
   "PAGAMENTO_EM_DIA",
 ] as const;
+
+function parseCsv(texto: string): string[][] {
+  const conteudo = texto.replace(/^\uFEFF/, "");
+  const registros: string[][] = [];
+  let linha: string[] = [];
+  let campo = "";
+  let entreAspas = false;
+  let fechouAspas = false;
+
+  for (let i = 0; i < conteudo.length; i++) {
+    const caractere = conteudo[i];
+
+    if (entreAspas) {
+      if (caractere === '"') {
+        if (conteudo[i + 1] === '"') {
+          campo += '"';
+          i++;
+        } else {
+          entreAspas = false;
+          fechouAspas = true;
+        }
+      } else {
+        campo += caractere;
+      }
+      continue;
+    }
+
+    if (fechouAspas) {
+      if (caractere === " " || caractere === "\t") continue;
+      if (caractere === ",") {
+        linha.push(campo);
+        campo = "";
+        fechouAspas = false;
+        continue;
+      }
+      if (caractere === "\r" || caractere === "\n") {
+        linha.push(campo);
+        registros.push(linha);
+        linha = [];
+        campo = "";
+        fechouAspas = false;
+        if (caractere === "\r" && conteudo[i + 1] === "\n") i++;
+        continue;
+      }
+      throw new Error("CSV inválido: há caracteres inesperados após um campo entre aspas.");
+    }
+
+    if (caractere === '"') {
+      if (campo.length > 0) throw new Error("CSV inválido: aspas devem começar no início de um campo.");
+      entreAspas = true;
+    } else if (caractere === ",") {
+      linha.push(campo);
+      campo = "";
+    } else if (caractere === "\r" || caractere === "\n") {
+      linha.push(campo);
+      registros.push(linha);
+      linha = [];
+      campo = "";
+      if (caractere === "\r" && conteudo[i + 1] === "\n") i++;
+    } else {
+      campo += caractere;
+    }
+  }
+
+  if (entreAspas) throw new Error("CSV inválido: há um campo com aspas não fechadas.");
+  if (campo.length > 0 || linha.length > 0 || fechouAspas) {
+    linha.push(campo);
+    registros.push(linha);
+  }
+
+  return registros.filter((registro) => registro.some((valor) => valor.trim() !== ""));
+}
 
 function extrairRespostas(formData: FormData) {
   const respostas: { perguntaId: string; nota: number; comentario: string | null }[] = [];
@@ -58,6 +131,8 @@ export default function CicloClienteDetalhePage() {
   const clienteId = searchParams.get("clienteId") ?? "";
   const { user, pronto } = useAuth();
   const db = useDb();
+  const [erroImportacao, setErroImportacao] = useState("");
+  const [statusImportacao, setStatusImportacao] = useState("");
 
   if (!pronto || !db || !user) return null;
   if (!podeAcessarProjeto(user, projetoId)) return <p className="text-sm text-neutral-500">Sem acesso a este projeto.</p>;
@@ -156,49 +231,99 @@ export default function CicloClienteDetalhePage() {
 
   async function handleImportarCSV(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const arquivo = formData.get("arquivo") as File | null;
-    if (!arquivo || arquivo.size === 0) {
-      alert("Selecione um arquivo CSV");
-      return;
-    }
-    const texto = await arquivo.text();
-    const linhas = texto.split(/\r?\n/).filter((l) => l.trim().length > 0);
-    const [, ...dados] = linhas;
-    const registros = dados
-      .map((linha) => {
-        const [contatoClienteId, perguntaId, nota, ...resto] = linha.split(",");
-        return {
-          contatoClienteId: contatoClienteId?.trim(),
-          perguntaId: perguntaId?.trim(),
-          nota: Number(nota?.trim()),
-          comentario: resto.join(",").trim() || null,
-        };
-      })
-      .filter((r) => r.contatoClienteId && r.perguntaId && !Number.isNaN(r.nota));
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const arquivo = formData.get("arquivo");
+    setErroImportacao("");
+    setStatusImportacao("");
 
-    if (registros.length === 0) {
-      alert("Nenhuma linha válida encontrada no CSV");
+    if (!(arquivo instanceof File) || arquivo.size === 0) {
+      setErroImportacao("Selecione um arquivo CSV.");
       return;
     }
 
+    type RespostaImportada = {
+      contatoClienteId: string;
+      perguntaId: string;
+      nota: number;
+      comentario: string | null;
+    };
+
+    let respostasImportadas: RespostaImportada[];
+    try {
+      const linhas = parseCsv(await arquivo.text());
+      const cabecalho = linhas.shift()?.map((valor) => valor.trim().toLowerCase());
+      const cabecalhoEsperado = ["contatoclienteid", "perguntaid", "nota", "comentario"];
+      if (!cabecalho || cabecalho.length !== cabecalhoEsperado.length || cabecalho.some((valor, indice) => valor !== cabecalhoEsperado[indice])) {
+        throw new Error("Cabeçalho inválido. Use: contatoClienteId,perguntaId,nota,comentario.");
+      }
+      if (linhas.length === 0) throw new Error("O CSV não contém respostas para importar.");
+
+      const contatosPermitidos = new Set(contatos.map((contato) => contato.id));
+      const perguntasAtivasPermitidas = new Set(perguntasAtivas.map((pergunta) => pergunta.id));
+      const validadas: RespostaImportada[] = [];
+
+      linhas.forEach((linha, indice) => {
+        if (linha.length !== cabecalhoEsperado.length) {
+          throw new Error(`Registro ${indice + 2}: esperado 4 campos, mas foram encontrados ${linha.length}.`);
+        }
+        const [contatoClienteId, perguntaId, notaTexto, comentarioTexto] = linha.map((valor) => valor.trim());
+        const nota = Number(notaTexto);
+        if (!contatoClienteId || !contatosPermitidos.has(contatoClienteId)) {
+          throw new Error(`Registro ${indice + 2}: contato não pertence a este cliente.`);
+        }
+        if (!perguntaId || !perguntasAtivasPermitidas.has(perguntaId)) {
+          throw new Error(`Registro ${indice + 2}: pergunta ativa do polo cliente inválida.`);
+        }
+        if (!notaTexto || !Number.isFinite(nota) || nota < 0 || nota > 10) {
+          throw new Error(`Registro ${indice + 2}: a nota deve ser um número entre 0 e 10.`);
+        }
+        validadas.push({
+          contatoClienteId,
+          perguntaId,
+          nota,
+          comentario: comentarioTexto || null,
+        });
+      });
+
+      // Se o arquivo repetir o mesmo par, prevalece o último registro do próprio CSV.
+      const porPar = new Map<string, RespostaImportada>();
+      for (const resposta of validadas) {
+        porPar.set(JSON.stringify([resposta.contatoClienteId, resposta.perguntaId]), resposta);
+      }
+      respostasImportadas = Array.from(porPar.values());
+    } catch (erro) {
+      setErroImportacao(erro instanceof Error ? erro.message : "Não foi possível ler o arquivo CSV.");
+      return;
+    }
+
+    const paresImportados = new Set(
+      respostasImportadas.map((resposta) => JSON.stringify([resposta.contatoClienteId, resposta.perguntaId]))
+    );
     mutateDb((dbW) => {
-      for (const r of registros) {
+      dbW.respostasAtivas = dbW.respostasAtivas.filter(
+        (resposta) =>
+          resposta.cicloId !== cicloId ||
+          !paresImportados.has(JSON.stringify([resposta.contatoClienteId, resposta.perguntaId]))
+      );
+      const respondidoEm = new Date().toISOString();
+      for (const r of respostasImportadas) {
         dbW.respostasAtivas.push({
           id: novoId("resp"),
           cicloId,
-          contatoClienteId: r.contatoClienteId!,
-          perguntaId: r.perguntaId!,
+          contatoClienteId: r.contatoClienteId,
+          perguntaId: r.perguntaId,
           nota: r.nota,
           comentario: r.comentario,
           origem: "IMPORTACAO_PLANILHA",
           preenchidoPorUsuarioId: null,
-          respondidoEm: new Date().toISOString(),
+          respondidoEm,
         });
       }
     });
     recalcularAutomaticamente();
-    e.currentTarget.reset();
+    form.reset();
+    setStatusImportacao(`${respostasImportadas.length} resposta(s) importada(s) ou atualizada(s).`);
   }
 
   function handleMetasCiclo(e: React.FormEvent<HTMLFormElement>) {
@@ -275,7 +400,7 @@ export default function CicloClienteDetalhePage() {
       <Card>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-medium text-neutral-900">Risco de churn deste cliente</h2>
-          {podeCalcularSaude && <button onClick={handleCalcular} className="bg-neutral-900 text-white rounded-md px-3 py-1.5 text-sm hover:bg-neutral-800">
+          {podeCalcularSaude && <button onClick={handleCalcular} className="action-button action-primary">
             {riscoChurn ? "Recalcular" : "Calcular risco de churn"}
           </button>}
         </div>
@@ -372,7 +497,7 @@ export default function CicloClienteDetalhePage() {
 
         <form onSubmit={handleRespostasAtivas} className="space-y-4">
           <div className="flex flex-wrap gap-3">
-            <select name="contatoClienteId" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="">
+            <select name="contatoClienteId" aria-label="Contato do cliente" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="">
               <option value="">Contato do cliente...</option>
               {contatos.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -380,7 +505,7 @@ export default function CicloClienteDetalhePage() {
                 </option>
               ))}
             </select>
-            <select name="origem" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="PROXY_INTERNO">
+            <select name="origem" aria-label="Origem das respostas" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="PROXY_INTERNO">
               <option value="CLIENTE_DIRETO">Cliente respondeu diretamente</option>
               <option value="PROXY_INTERNO">Preenchido por mim em nome do cliente</option>
             </select>
@@ -420,12 +545,14 @@ export default function CicloClienteDetalhePage() {
             </div>
           ))}
 
-          <button className="bg-neutral-900 text-white rounded-md px-4 py-2 text-sm hover:bg-neutral-800">Salvar respostas do polo ativo</button>
+          <button className="action-button action-primary">Salvar respostas do polo ativo</button>
         </form>
 
+        {erroImportacao && <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{erroImportacao}</p>}
+        {statusImportacao && <p role="status" className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{statusImportacao}</p>}
         <form onSubmit={handleImportarCSV} className="mt-4 border-t border-neutral-100 pt-4 flex items-center gap-2">
-          <input type="file" name="arquivo" accept=".csv" required className="text-sm" />
-          <button className="text-sm underline text-neutral-600 hover:text-neutral-900">
+          <input type="file" name="arquivo" accept=".csv" aria-label="Arquivo CSV de respostas" required className="text-sm" />
+          <button className="inline-action inline-action-secondary">
             Importar CSV (contatoClienteId,perguntaId,nota,comentario)
           </button>
         </form>
@@ -468,7 +595,7 @@ export default function CicloClienteDetalhePage() {
                 />
               </div>
             ))}
-            <button className="bg-neutral-900 text-white rounded-md px-4 py-2 text-sm hover:bg-neutral-800">Salvar metas entregues</button>
+          <button className="action-button action-primary">Salvar metas entregues</button>
           </form>
         </Card>
       )}
@@ -501,7 +628,7 @@ export default function CicloClienteDetalhePage() {
             </div>
           ))}
 
-          <button className="bg-neutral-900 text-white rounded-md px-4 py-2 text-sm hover:bg-neutral-800">Salvar minha avaliação (CS)</button>
+          <button className="action-button action-primary">Salvar minha avaliação (CS)</button>
         </form>
 
         {respostasPassivas.length > 0 && (

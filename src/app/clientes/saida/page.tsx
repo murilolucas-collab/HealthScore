@@ -148,10 +148,10 @@ export default function FormularioSaidaPage() {
           </label>
 
           <div className="flex flex-wrap items-center gap-3 border-t border-neutral-100 pt-4">
-          <button type="submit" disabled={salvando} className="rounded-md bg-red-700 px-4 py-3 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50">
+          <button type="submit" disabled={salvando} className="action-button action-danger disabled:opacity-50">
             {salvando ? "Registrando saída…" : "Confirmar saída e encerrar cliente"}
           </button>
-          <Link href={`/clientes/detalhe?id=${id}`} className="rounded-md border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Cancelar</Link>
+          <Link href={`/clientes/detalhe?id=${id}`} className="action-button action-secondary">Cancelar</Link>
           </div>
         </form>
       </Card>

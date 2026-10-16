@@ -49,6 +49,7 @@ export function PerguntaInput({
           type="number"
           min={0}
           name={`marcadas_${perguntaId}`}
+          aria-label="Quantidade de reuniões marcadas"
           className="w-16 rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-center"
         />
         <span>Realizadas</span>
@@ -56,6 +57,7 @@ export function PerguntaInput({
           type="number"
           min={0}
           name={`realizadas_${perguntaId}`}
+          aria-label="Quantidade de reuniões realizadas"
           className="w-16 rounded-md border border-neutral-300 px-2 py-1.5 text-sm text-center"
         />
       </div>

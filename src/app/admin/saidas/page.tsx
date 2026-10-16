@@ -114,7 +114,7 @@ export default function MotivosSaidaPage() {
                 <span>Registrado por {s.responsavel?.nome}</span>
                 <button
                   onClick={() => handleExcluir(s.id, s.clienteId, s.cliente?.nome)}
-                  className="text-red-600 underline hover:text-red-800 normal-case"
+                  className="inline-action inline-action-danger"
                 >
                   Excluir registro
                 </button>

@@ -90,7 +90,7 @@ export default function NovoProjetoPage() {
             <label className="block text-sm font-medium text-neutral-700 mb-1">Data de início</label>
             <input type="date" name="dataInicio" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
-          <button type="submit" className="bg-neutral-900 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-neutral-800">
+          <button type="submit" className="action-button action-primary">
             Criar projeto
           </button>
         </form>

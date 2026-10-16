@@ -40,7 +40,10 @@ export const PERMISSOES_TOTAIS: Record<ModuloUsuario, boolean> = {
 };
 
 export function isAdminGeral(user: Pick<SessionUser, "nome" | "email" | "papel">) {
-  return user.papel === "ADMIN" && (user.nome.trim().toLowerCase() === "admin geral" || user.email.toLowerCase() === "admin@agencia.com");
+  // O nome é editável e não pode conceder privilégios. O email-raiz é único
+  // (a criação de usuários rejeita duplicatas) e permanece como identificador
+  // legado do Admin Geral até a migração para autenticação com papéis no servidor.
+  return user.papel === "ADMIN" && user.email.trim().toLowerCase() === "admin@agencia.com";
 }
 
 export function permissoesEfetivas(

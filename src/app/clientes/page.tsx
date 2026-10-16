@@ -47,7 +47,7 @@ export default function ClientesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Relacionamento</p><h1>Clientes <span className="text-base font-medium text-neutral-400">{clientes.length}</span></h1><p className="mb-0 mt-2 text-sm text-neutral-500">Consulte status, projeto e avaliação mais recente.</p></div>
-        {podeGerenciar && <Link href="/clientes/novo" className="bg-neutral-900 text-white text-sm px-4 py-2 rounded-md hover:bg-neutral-800">+ Novo cliente</Link>}
+        {podeGerenciar && <Link href="/clientes/novo" className="action-button action-primary">+ Novo cliente</Link>}
       </div>
 
       <div className="grid gap-2 rounded-xl border border-neutral-200 bg-white p-3 md:grid-cols-[1fr_220px_180px]">
@@ -78,7 +78,7 @@ export default function ClientesPage() {
       <div className="grid gap-3">
         {clientes.map(({ cliente, projeto, risco }) => (
           <Card key={cliente.id} className="client-list-card hover:border-neutral-400 transition flex items-center justify-between gap-4">
-            <Link href={`/clientes/detalhe?id=${cliente.id}`} className="flex-1 min-w-0">
+            <Link href={`/clientes/detalhe?id=${cliente.id}`} className="action-card-link flex-1 min-w-0 rounded-md p-1">
               <div className="font-medium text-neutral-900">{cliente.nome}</div>
               <div className="text-sm text-neutral-500">
                 {projeto?.nome ?? "Sem projeto"} · {cliente.segmento ?? "Sem segmento"}
@@ -87,7 +87,7 @@ export default function ClientesPage() {
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <StatusBadge status={cliente.status} />
               <RiscoBadge nivel={risco?.nivelRisco} />
-              {podeGerenciar && <button onClick={() => handleExcluir(cliente.id, cliente.nome)} className="text-xs text-red-600 underline hover:text-red-800">Excluir</button>}
+              {podeGerenciar && <button onClick={() => handleExcluir(cliente.id, cliente.nome)} className="inline-action inline-action-danger">Excluir</button>}
             </div>
           </Card>
         ))}

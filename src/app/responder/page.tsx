@@ -160,15 +160,15 @@ export default function ResponderPesquisaPage() {
           })}
 
           <div className="rounded-xl border border-neutral-200 p-4 sm:p-5">
-            <label className="block text-sm font-medium text-neutral-800 mb-2">
+            <label htmlFor="responder-sugestao" className="block text-sm font-medium text-neutral-800 mb-2">
               Deixe aqui a sua sugestão de melhoria (opcional):
             </label>
-            <textarea name={`comentario_${geral[0]?.id}`} rows={3} className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <textarea id="responder-sugestao" name={`comentario_${geral[0]?.id}`} rows={3} className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
 
           {erroEnvio && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{erroEnvio}</p>}
           <p className="mb-0 text-xs text-neutral-500">Suas respostas são usadas para melhorar o acompanhamento e a qualidade das entregas.</p>
-          <button type="submit" className="w-full bg-neutral-900 text-white rounded-md py-3 text-sm font-semibold hover:bg-neutral-800">
+          <button type="submit" className="action-button action-primary w-full">
             Enviar respostas
           </button>
         </form>

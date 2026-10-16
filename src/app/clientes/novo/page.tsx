@@ -100,8 +100,9 @@ export default function NovoClientePage() {
             <div className="mb-4 border-b border-neutral-100 pb-3"><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-teal-800">Etapa 1</p><h2 className="mb-0 text-base font-semibold">Dados do cliente</h2><p className="mb-0 mt-1 text-xs text-neutral-500">Informações básicas para organizar o relacionamento.</p></div>
             <div className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Projeto <span className="text-red-600">*</span></label>
+            <label htmlFor="cliente-projeto" className="block text-sm font-medium text-neutral-700 mb-1">Projeto <span className="text-red-600">*</span></label>
             <select
+              id="cliente-projeto"
               name="projetoId"
               required
               defaultValue={projetos.some((p) => p.id === projetoIdPreSelecionado) ? projetoIdPreSelecionado : ""}
@@ -119,20 +120,20 @@ export default function NovoClientePage() {
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Nome do cliente <span className="text-red-600">*</span></label>
-            <input name="nome" required className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <label htmlFor="cliente-nome" className="block text-sm font-medium text-neutral-700 mb-1">Nome do cliente <span className="text-red-600">*</span></label>
+            <input id="cliente-nome" name="nome" required className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">CNPJ</label>
-            <input name="cnpj" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <label htmlFor="cliente-cnpj" className="block text-sm font-medium text-neutral-700 mb-1">CNPJ</label>
+            <input id="cliente-cnpj" name="cnpj" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Segmento</label>
-            <input name="segmento" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <label htmlFor="cliente-segmento" className="block text-sm font-medium text-neutral-700 mb-1">Segmento</label>
+            <input id="cliente-segmento" name="segmento" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Início do contrato</label>
-            <input type="date" name="inicioContrato" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <label htmlFor="cliente-inicio-contrato" className="block text-sm font-medium text-neutral-700 mb-1">Início do contrato</label>
+            <input id="cliente-inicio-contrato" type="date" name="inicioContrato" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
             </div>
           </section>
@@ -142,25 +143,25 @@ export default function NovoClientePage() {
           <p className="mb-3 text-xs text-neutral-500">Preencha o nome e o email para habilitar o envio do questionário ao cliente.</p>
           <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Nome</label>
-            <input name="contatoNome" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <label htmlFor="contato-nome" className="block text-sm font-medium text-neutral-700 mb-1">Nome</label>
+            <input id="contato-nome" name="contatoNome" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
-            <input type="email" name="contatoEmail" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <label htmlFor="contato-email" className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
+            <input id="contato-email" type="email" name="contatoEmail" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Cargo</label>
-            <input name="contatoCargo" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
+            <label htmlFor="contato-cargo" className="block text-sm font-medium text-neutral-700 mb-1">Cargo</label>
+            <input id="contato-cargo" name="contatoCargo" className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" />
           </div>
           </div>
           </section>
 
           <div className="flex flex-wrap items-center gap-3 border-t border-neutral-100 pt-4">
-          <button type="submit" disabled={salvando || projetos.length === 0} className="bg-neutral-900 text-white rounded-md px-5 py-3 text-sm font-medium hover:bg-neutral-800">
+          <button type="submit" disabled={salvando || projetos.length === 0} className="action-button action-primary">
             {salvando ? "Salvando…" : "Criar cliente"}
           </button>
-          <Link href="/clientes" className="rounded-md border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Cancelar</Link>
+          <Link href="/clientes" className="action-button action-secondary">Cancelar</Link>
           </div>
         </form>
       </Card>

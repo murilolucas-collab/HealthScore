@@ -45,7 +45,7 @@ export default function Sidebar() {
           <span><strong>3PONTOS</strong><small>Company · HealthScore</small></span>
         </Link>
 
-        <nav className="sidebar-nav" aria-label="Navegação principal" onClick={() => setAberto(false)}>
+        <nav className="sidebar-nav" aria-label="Navegação principal" tabIndex={0} onClick={() => setAberto(false)}>
           <div className="nav-section">Visão geral</div>
           {temPermissao(user, "verDashboard") && <SidebarNavLink href="/" exact>▦　Dashboard</SidebarNavLink>}
           {temPermissao(user, "verProjetos") && <SidebarNavLink href="/projetos">◫　Projetos</SidebarNavLink>}
@@ -66,7 +66,7 @@ export default function Sidebar() {
           {isAdminGeral(user) && <div className="sync-indicator"><i />{syncAtivo === true ? "Dados sincronizados" : syncAtivo === false ? "Sincronização indisponível" : "Verificando conexão…"}</div>}
           <div className="profile-name">{user.nome}</div>
           <div className="profile-role">{isAdminGeral(user) ? "Admin Geral" : user.papel === "ADMIN" ? "Administrador" : "Equipe 3Pontos"}</div>
-          <button type="button" onClick={logout}>Sair da conta　↗</button>
+          <button type="button" onClick={logout} className="inline-action inline-action-secondary">Sair da conta　↗</button>
         </footer>
       </aside>
     </>

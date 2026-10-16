@@ -217,14 +217,14 @@ export default function ClienteDetalhePage() {
             <span className="text-[11px] font-medium text-neutral-500">Status manual</span>
             <StatusBadge status={cliente.status} />
           </div>
-          {perfilRisco && (
-            <div className="grid gap-1">
-              <span className="text-[11px] font-medium text-neutral-500">Saúde calculada</span>
-              <span className="text-xs text-neutral-600">
-                Propensão a risco: {perfilRisco.propensaoRisco.toFixed(0)} · {perfilRisco.tendencia}
-              </span>
-            </div>
-          )}
+          <div className="grid gap-1">
+            <span className="text-[11px] font-medium text-neutral-500">Saúde calculada</span>
+            <span className="text-xs text-neutral-600">
+              {riscoAtual
+                ? `Propensão a risco: ${perfilRisco?.propensaoRisco.toFixed(0) ?? "—"} · ${perfilRisco?.tendencia ?? "Sem tendência"}`
+                : "— · Sem cálculo"}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -232,21 +232,21 @@ export default function ClienteDetalhePage() {
         {cliente.status !== "INATIVO" ? (
           <>
             {podeAlterarStatus ? <form onSubmit={handleStatus} className="flex items-center gap-2">
-              <label className="text-sm text-neutral-600">Status manual do cliente:</label>
-              <select name="status" defaultValue={cliente.status} onChange={() => { setStatusSalvo(false); setErroStatus(""); }} disabled={salvandoStatus} className="rounded-md border border-neutral-300 px-2 py-1 text-sm disabled:opacity-60">
+              <label htmlFor="cliente-status-manual" className="text-sm text-neutral-600">Status manual do cliente:</label>
+              <select id="cliente-status-manual" name="status" defaultValue={cliente.status} onChange={() => { setStatusSalvo(false); setErroStatus(""); }} disabled={salvandoStatus} className="rounded-md border border-neutral-300 px-2 py-1 text-sm disabled:opacity-60">
                 <option value="ATIVO">Ativo</option>
                 <option value="EM_RISCO">Em risco</option>
               </select>
-              <button disabled={salvandoStatus} className="text-sm underline text-neutral-600 hover:text-neutral-900 disabled:opacity-60">{salvandoStatus ? "Salvando…" : "Salvar"}</button>
+              <button disabled={salvandoStatus} className="inline-action inline-action-secondary disabled:opacity-60">{salvandoStatus ? "Salvando…" : "Salvar"}</button>
               {statusSalvo && <span role="status" className="text-xs text-emerald-700">Status salvo</span>}
               {erroStatus && <span role="alert" className="text-xs text-red-700">{erroStatus}</span>}
             </form> : <span className="text-sm text-neutral-500">Status do cliente: {cliente.status === "EM_RISCO" ? "Em risco" : "Ativo"}</span>}
-            {podeGerenciar && <Link href={`/clientes/saida?id=${cliente.id}`} className="text-sm text-red-600 underline hover:text-red-800">Encerrar cliente (registrar saída)</Link>}
+            {podeGerenciar && <Link href={`/clientes/saida?id=${cliente.id}`} className="inline-action inline-action-danger">Encerrar cliente (registrar saída)</Link>}
           </>
         ) : (
           <span className="text-sm text-neutral-500">Cliente encerrado — veja o formulário de saída abaixo.</span>
         )}
-        {podeGerenciar && <button onClick={handleExcluir} className="text-sm text-red-600 underline hover:text-red-800 ml-auto">Excluir cliente definitivamente</button>}
+        {podeGerenciar && <button onClick={handleExcluir} className="inline-action inline-action-danger ml-auto">Excluir cliente definitivamente</button>}
       </div>
 
       {formularioSaida && responsavelSaida && (
@@ -285,7 +285,7 @@ export default function ClienteDetalhePage() {
         <Card>
           <h2 className="font-medium text-neutral-900 mb-3">Projeto</h2>
           {projeto ? (
-            <Link href={`/projetos/detalhe?id=${projeto.id}`} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400">
+            <Link href={`/projetos/detalhe?id=${projeto.id}`} className="action-card-link flex min-h-11 items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400">
               <span className="text-sm text-neutral-800">{projeto.nome}</span>
               <RiscoBadge nivel={riscoAtual?.nivelRisco} />
             </Link>
@@ -315,7 +315,7 @@ export default function ClienteDetalhePage() {
             <input name="nome" placeholder="Nome" required className="col-span-2 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
             <input name="email" type="email" placeholder="Email" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
             <input name="cargo" placeholder="Cargo" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
-            <button className="col-span-2 bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Adicionar contato</button>
+            <button className="action-button action-primary col-span-2">+ Adicionar contato</button>
           </form>}
         </Card>
       </div>
@@ -332,7 +332,7 @@ export default function ClienteDetalhePage() {
                 {m.nome}: {m.valorAlvo}
                 {m.unidade ? ` ${m.unidade}` : ""}
               </span>
-              <button onClick={() => encerrarMeta(m.id)} className="text-xs text-neutral-400 underline hover:text-neutral-700">
+              <button onClick={() => encerrarMeta(m.id)} className="inline-action inline-action-secondary">
                 Encerrar meta
               </button>
             </div>
@@ -343,14 +343,14 @@ export default function ClienteDetalhePage() {
           <input name="nome" placeholder="Nome (ex: Leads mensais)" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <input name="valorAlvo" type="number" step="any" placeholder="Valor alvo" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <input name="unidade" placeholder="Unidade (ex: leads, R$)" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
-          <button className="col-span-3 bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Adicionar meta</button>
+          <button className="action-button action-primary col-span-3">+ Adicionar meta</button>
         </form>}
       </Card>
 
       <Card>
         <h2 className="font-medium text-neutral-900 mb-3">Histórico do cliente (reclamações, intervenções, ações de CS...)</h2>
         {podeGerenciar && <form onSubmit={handleEvento} className="grid md:grid-cols-3 gap-2 mb-4">
-          <select name="tipo" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
+          <select name="tipo" aria-label="Tipo de evento do histórico" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
             {Object.entries(TIPO_EVENTO_LABEL).map(([valor, label]) => (
               <option key={valor} value={valor}>
                 {label}
@@ -358,7 +358,7 @@ export default function ClienteDetalhePage() {
             ))}
           </select>
           <input name="descricao" placeholder="Descreva o ocorrido" required className="md:col-span-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
-          <button className="bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Registrar</button>
+          <button className="action-button action-primary">+ Registrar</button>
         </form>}
 
         <div className="space-y-2">

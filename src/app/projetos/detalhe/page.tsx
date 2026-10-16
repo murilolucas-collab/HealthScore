@@ -206,7 +206,7 @@ export default function ProjetoDetalhePage() {
         <div className="flex items-center gap-3">
           <StatusBadge status={projeto.status} />
           {isAdmin && (
-            <button onClick={handleExcluirProjeto} className="text-sm text-red-600 underline hover:text-red-800">
+            <button onClick={handleExcluirProjeto} className="inline-action inline-action-danger">
               Excluir projeto
             </button>
           )}
@@ -223,7 +223,7 @@ export default function ProjetoDetalhePage() {
         <div className="flex items-center gap-3">
           {resumoSaude.scoreSaudeGeral !== null && <span className="text-2xl font-semibold text-neutral-900">{resumoSaude.scoreSaudeGeral.toFixed(1)}/10</span>}
           <RiscoBadge nivel={resumoSaude.nivelRisco ?? undefined} />
-          {podeCalcularSaude && <button onClick={handleCalcularSaudeProjeto} className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white hover:bg-neutral-800">
+          {podeCalcularSaude && <button onClick={handleCalcularSaudeProjeto} className="action-button action-primary">
             {resumoSaude.scoreSaudeGeral === null ? "Calcular saúde" : "Recalcular saúde"}
           </button>}
         </div>
@@ -233,7 +233,7 @@ export default function ProjetoDetalhePage() {
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div><h2 className="mb-0 font-semibold text-neutral-900">Clientes deste projeto</h2><p className="mb-0 mt-1 text-xs text-neutral-500">{totalClientes} cliente(s)</p></div>
           {isAdmin && (
-            <Link href={`/clientes/novo?projetoId=${id}`} className="bg-neutral-900 text-white text-sm px-3 py-1.5 rounded-md hover:bg-neutral-800">
+            <Link href={`/clientes/novo?projetoId=${id}`} className="action-button action-primary">
               + Novo cliente
             </Link>
           )}
@@ -248,7 +248,7 @@ export default function ProjetoDetalhePage() {
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {clientes.map((c) => (
             <div key={c.id} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2">
-              <Link href={`/clientes/detalhe?id=${c.id}`} className="flex-1 min-w-0 hover:underline">
+                  <Link href={`/clientes/detalhe?id=${c.id}`} className="action-card-link flex-1 min-w-0 rounded-md p-1 hover:underline">
                 <span className="text-sm text-neutral-800">{c.nome}</span>
               </Link>
               <div className="flex items-center gap-3 shrink-0">
@@ -257,7 +257,7 @@ export default function ProjetoDetalhePage() {
                 {isAdmin && (
                   <button
                     onClick={() => handleExcluirCliente(c.id, c.nome)}
-                    className="text-xs text-red-600 underline hover:text-red-800"
+                    className="inline-action inline-action-danger"
                   >
                     Excluir
                   </button>
@@ -283,8 +283,8 @@ export default function ProjetoDetalhePage() {
           {isAdmin ? (
             <form onSubmit={handleConfigCiclo} className="flex flex-wrap items-end gap-2 mb-4">
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Periodicidade</label>
-                <select name="periodicidade" defaultValue={configuracaoCiclo?.periodicidade} className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
+                <label htmlFor="periodicidade-ciclo" className="block text-xs text-neutral-500 mb-1">Periodicidade</label>
+                <select id="periodicidade-ciclo" name="periodicidade" defaultValue={configuracaoCiclo?.periodicidade} className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
                   <option value="MENSAL">Mensal</option>
                   <option value="TRIMESTRAL">Trimestral</option>
                   <option value="SEMESTRAL">Semestral</option>
@@ -293,22 +293,22 @@ export default function ProjetoDetalhePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-neutral-500 mb-1">Dia de disparo</label>
-                <input type="number" name="diaDisparo" min={1} max={28} defaultValue={configuracaoCiclo?.diaDisparo} className="w-20 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
+                <label htmlFor="dia-disparo-ciclo" className="block text-xs text-neutral-500 mb-1">Dia de disparo</label>
+                <input id="dia-disparo-ciclo" type="number" name="diaDisparo" min={1} max={28} defaultValue={configuracaoCiclo?.diaDisparo} className="w-20 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
               </div>
-              <button className="text-sm underline text-neutral-600 hover:text-neutral-900 pb-1.5">Salvar</button>
+              <button className="inline-action inline-action-secondary">Salvar</button>
             </form>
           ) : (
             <p className="text-sm text-neutral-500 mb-4">Periodicidade: {configuracaoCiclo?.periodicidade}</p>
           )}
 
-          <button onClick={abrirNovoCiclo} className="bg-neutral-900 text-white rounded-md px-3 py-1.5 text-sm hover:bg-neutral-800">
+          <button onClick={abrirNovoCiclo} className="action-button action-primary">
             + Abrir novo ciclo agora
           </button>
 
           <div className="mt-4 space-y-2">
             {ciclos.map((c) => (
-              <Link key={c.id} href={`/projetos/ciclo?projetoId=${id}&cicloId=${c.id}`} className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400">
+              <Link key={c.id} href={`/projetos/ciclo?projetoId=${id}&cicloId=${c.id}`} className="action-card-link flex min-h-11 items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400">
                 <div className="text-sm text-neutral-800">
                   {format(new Date(c.dataInicio), "dd/MM/yyyy", { locale: ptBR })}
                   {c.dataFim && ` – ${format(new Date(c.dataFim), "dd/MM/yyyy", { locale: ptBR })}`}
@@ -327,7 +327,7 @@ export default function ProjetoDetalhePage() {
             <input type="number" step="0.1" name="indiceEngajamento" placeholder="Engajamento (0-100)" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
             <input type="number" step="0.1" name="indiceAdocao" placeholder="Adoção (0-100)" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
             <input type="number" step="0.1" name="indiceMaturidade" placeholder="Maturidade (0-100)" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
-            <button className="bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Adicionar</button>
+            <button className="action-button action-primary">+ Adicionar</button>
           </form>
           <div className="space-y-1">
             {indicadores.map((i) => (
@@ -352,7 +352,7 @@ export default function ProjetoDetalhePage() {
                 <span className="text-sm text-neutral-800">
                   {a.usuario.nome} ({a.usuario.papel})
                 </span>
-                <button onClick={() => revogarAcesso(a.usuarioId)} className="text-xs text-red-600 underline">
+                <button onClick={() => revogarAcesso(a.usuarioId)} className="inline-action inline-action-danger">
                   Revogar
                 </button>
               </div>
@@ -360,7 +360,7 @@ export default function ProjetoDetalhePage() {
             {acessos.length === 0 && <p className="text-sm text-neutral-500">Nenhum usuário com acesso direto ainda.</p>}
           </div>
           <form onSubmit={concederAcesso} className="flex gap-2">
-            <select name="usuarioId" className="flex-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="">
+            <select name="usuarioId" aria-label="Usuário para conceder acesso ao projeto" className="flex-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="">
               <option value="">Selecione um usuário...</option>
               {usuarios.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -368,7 +368,7 @@ export default function ProjetoDetalhePage() {
                 </option>
               ))}
             </select>
-            <button className="bg-neutral-900 text-white rounded-md px-3 py-1.5 text-sm hover:bg-neutral-800">Conceder</button>
+            <button className="action-button action-primary">Conceder</button>
           </form>
         </Card>
       )}

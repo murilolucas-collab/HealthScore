@@ -68,7 +68,7 @@ export default function CicloRosterPage() {
 
       <div className="mt-3 grid gap-2">
         {clientes.map((c) => (
-          <Link key={c.id} href={`/projetos/ciclo/cliente?projetoId=${projetoId}&cicloId=${cicloId}&clienteId=${c.id}`}>
+          <Link key={c.id} href={`/projetos/ciclo/cliente?projetoId=${projetoId}&cicloId=${cicloId}&clienteId=${c.id}`} className="action-card-link">
             <Card className="cycle-client-row hover:border-neutral-400 transition flex items-center justify-between gap-4">
               <div>
                 <div className="font-medium text-neutral-900">{c.nome}</div>

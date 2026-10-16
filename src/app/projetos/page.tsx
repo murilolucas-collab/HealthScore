@@ -60,7 +60,7 @@ export default function ProjetosPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Carteira de trabalho</p><h1>Projetos</h1><p className="mb-0 mt-2 text-sm text-neutral-500">Acompanhe clientes, ciclos e saúde de cada frente.</p></div>
         {isAdmin && (
-          <Link href="/projetos/novo" className="bg-neutral-900 text-white text-sm px-4 py-2 rounded-md hover:bg-neutral-800">
+          <Link href="/projetos/novo" className="action-button action-primary">
             + Novo projeto
           </Link>
         )}
@@ -75,7 +75,7 @@ export default function ProjetosPage() {
 
       <div className="grid gap-3">
         {projetos.map((p) => (
-          <Link key={p.id} href={`/projetos/detalhe?id=${p.id}`}>
+          <Link key={p.id} href={`/projetos/detalhe?id=${p.id}`} className="action-card-link">
             <Card className="project-list-card hover:border-neutral-400 transition flex items-center justify-between gap-5">
               <div className="min-w-0">
                 <div className="font-semibold text-neutral-900">{p.nome}</div>
@@ -88,7 +88,7 @@ export default function ProjetosPage() {
                 {isAdmin && (
                   <button
                     onClick={(e) => handleExcluir(e, p.id, p.nome)}
-                    className="text-xs text-red-600 underline hover:text-red-800"
+                    className="inline-action inline-action-danger"
                   >
                     Excluir
                   </button>

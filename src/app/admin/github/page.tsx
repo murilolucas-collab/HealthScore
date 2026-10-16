@@ -118,14 +118,14 @@ export default function GithubStatusPage() {
           <button
             onClick={handleCarregarAgora}
             disabled={!!carregando}
-            className="bg-neutral-900 text-white rounded-md px-4 py-2.5 text-sm hover:bg-neutral-800 disabled:opacity-50"
+            className="action-button action-primary disabled:opacity-50"
           >
             {carregando === "carregando" ? "Carregando..." : "Carregar dados mais recentes"}
           </button>
           <button
             onClick={handleSalvarAgora}
             disabled={!!carregando}
-            className="bg-neutral-900 text-white rounded-md px-4 py-2.5 text-sm hover:bg-neutral-800 disabled:opacity-50"
+            className="action-button action-primary disabled:opacity-50"
           >
             {carregando === "salvando" ? "Salvando..." : "Forçar salvar agora"}
           </button>

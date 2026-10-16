@@ -128,7 +128,7 @@ export default function UsuariosPage() {
           <input name="nome" placeholder="Nome" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <input name="email" type="email" placeholder="Email" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <input name="senha" type="password" placeholder="Senha (mín. 6 caracteres)" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
-          <select name="papel" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="PADRAO">
+          <select name="papel" aria-label="Perfil do novo usuário" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="PADRAO">
             <option value="PADRAO">Padrão</option>
             <option value="ADMIN">Admin</option>
           </select>
@@ -143,7 +143,7 @@ export default function UsuariosPage() {
               ))}
             </div>
           </div>
-          <button className="md:col-span-4 bg-neutral-900 text-white rounded-md py-1.5 text-sm hover:bg-neutral-800">+ Criar usuário</button>
+          <button className="action-button action-primary md:col-span-4">+ Criar usuário</button>
         </form>
       </Card>
 
@@ -171,7 +171,7 @@ export default function UsuariosPage() {
                       {titulo}
                     </label>
                   ))}
-                  <button className="col-span-2 mt-1 text-left text-[11px] font-medium text-neutral-700 underline">Salvar módulos</button>
+                  <button className="inline-action inline-action-secondary col-span-2 mt-1 justify-self-start">Salvar módulos</button>
                 </form>
               )}
               {isAdminGeral(u) && (
@@ -200,12 +200,12 @@ export default function UsuariosPage() {
                   ) : (
                     <p className="text-[11px] text-neutral-500">Nenhum projeto cadastrado.</p>
                   )}
-                  <button className="mt-2 text-left text-[11px] font-medium text-neutral-700 underline">Salvar projetos</button>
+                  <button className="inline-action inline-action-secondary mt-2 justify-self-start">Salvar projetos</button>
                 </form>
               )}
               <button
                 onClick={() => handleExcluir(u)}
-                className="text-xs text-red-600 underline hover:text-red-800"
+                className="inline-action inline-action-danger self-start"
               >
                 Excluir
               </button>
