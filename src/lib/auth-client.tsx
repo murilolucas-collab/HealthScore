@@ -30,21 +30,35 @@ export const PERMISSOES_PADRAO: Record<ModuloUsuario, boolean> = {
   calcularSaude: true,
 };
 
+export const PERMISSOES_TOTAIS: Record<ModuloUsuario, boolean> = {
+  verDashboard: true,
+  verProjetos: true,
+  verClientes: true,
+  gerenciarClientes: true,
+  alterarStatusCliente: true,
+  calcularSaude: true,
+};
+
 export function isAdminGeral(user: Pick<SessionUser, "nome" | "email" | "papel">) {
   return user.papel === "ADMIN" && (user.nome.trim().toLowerCase() === "admin geral" || user.email.toLowerCase() === "admin@agencia.com");
 }
 
-export function permissoesEfetivas(usuario: Pick<Usuario, "papel" | "permissoes">): Record<ModuloUsuario, boolean> {
-  if (usuario.papel === "ADMIN") {
-    return { verDashboard: true, verProjetos: true, verClientes: true, gerenciarClientes: true, alterarStatusCliente: true, calcularSaude: true };
-  }
+export function permissoesEfetivas(
+  usuario: Pick<Usuario, "nome" | "email" | "papel" | "permissoes">
+): Record<ModuloUsuario, boolean> {
+  // O Admin Geral é o único perfil que não pode ser limitado por módulos.
+  if (isAdminGeral(usuario)) return PERMISSOES_TOTAIS;
+
+  // Mantém administradores antigos funcionando durante a migração do schema.
+  // Assim que o Admin editar os módulos, o registro passa a ser individual.
+  if (usuario.papel === "ADMIN" && !usuario.permissoes) return PERMISSOES_TOTAIS;
+
   return { ...PERMISSOES_PADRAO, ...(usuario.permissoes ?? {}) };
 }
 
 export function temPermissao(user: SessionUser, modulo: ModuloUsuario) {
-  if (user.papel === "ADMIN") return true;
   const usuario = getDb().usuarios.find((u) => u.id === user.id);
-  return permissoesEfetivas(usuario ?? { papel: user.papel })[modulo];
+  return permissoesEfetivas(usuario ?? user)[modulo];
 }
 
 interface AuthContextValue {
