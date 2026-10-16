@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth, getProjetoIdsDoUsuario } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { Card, StatusBadge, RiscoBadge, CategoriaLabel } from "@/components/ui";
 import type { NivelRisco } from "@/lib/types";
@@ -20,6 +20,9 @@ export default function Home() {
   const db = useDb();
 
   if (!pronto || !db || !user) return null;
+  if (!temPermissao(user, "verDashboard")) {
+    return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar o dashboard.</p>;
+  }
 
   const isAdmin = user.papel === "ADMIN";
   const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
