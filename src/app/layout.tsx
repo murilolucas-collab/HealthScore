@@ -1,36 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Saúde de Clientes | Risco de Churn",
-  description: "Ferramenta de saúde de clientes e projetos de marketing",
+  title: "HealthScore | 3Pontos Company",
+  description: "Acompanhamento da saúde e relacionamento com clientes — 3Pontos Company.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex bg-neutral-50">
-        <Providers>{children}</Providers>
-      </body>
+    <html lang="pt-BR">
+      <body><Providers>{children}</Providers></body>
     </html>
   );
 }

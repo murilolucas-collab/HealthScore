@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useAuth, podeAcessarProjeto } from "@/lib/auth-client";
+import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId } from "@/lib/store";
 import { Card } from "@/components/ui";
@@ -26,6 +28,8 @@ export default function FormularioSaidaPage() {
   const { user, pronto } = useAuth();
   const db = useDb();
   const router = useRouter();
+  const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
   const cliente = db?.clientes.find((c) => c.id === id);
   const clienteEncerrado = cliente?.status === "INATIVO";
@@ -43,10 +47,16 @@ export default function FormularioSaidaPage() {
     return <p className="text-sm text-neutral-500">Cliente não encontrado.</p>;
   }
 
+  if (!temPermissao(user, "gerenciarClientes") || !temPermissao(user, "alterarStatusCliente")) {
+    return <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Seu usuário não tem permissão para encerrar clientes.</p>;
+  }
+
   if (clienteEncerrado) return null;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (salvando) return;
+    setErro("");
     const formData = new FormData(e.currentTarget);
     const motivoPrincipal = String(formData.get("motivoPrincipal") ?? "OUTRO") as MotivoSaida;
     const detalhamento = String(formData.get("detalhamento") ?? "").trim();
@@ -55,10 +65,15 @@ export default function FormularioSaidaPage() {
     const notaSatisfacaoGeral = notaStr ? Number(notaStr) : null;
 
     if (!detalhamento) {
-      alert("Descreva o que motivou a saída do cliente");
+      setErro("Descreva o que motivou a saída do cliente.");
+      return;
+    }
+    if (notaSatisfacaoGeral !== null && (!Number.isFinite(notaSatisfacaoGeral) || notaSatisfacaoGeral < 0 || notaSatisfacaoGeral > 10)) {
+      setErro("A nota de satisfação deve ser um número entre 0 e 10.");
       return;
     }
 
+    setSalvando(true);
     mutateDb((dbW) => {
       dbW.formulariosSaida.push({
         id: novoId("saida"),
@@ -79,17 +94,22 @@ export default function FormularioSaidaPage() {
   }
 
   return (
-    <div className="max-w-xl space-y-6">
+    <div className="max-w-3xl space-y-6">
+      <div className="flex items-center gap-2 text-xs font-medium text-neutral-500"><Link href={`/clientes/detalhe?id=${id}`} className="hover:underline">{cliente.nome}</Link><span aria-hidden="true">/</span><span>Encerramento</span></div>
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Formulário de saída</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-red-700">Encerramento de contrato</p>
+        <h1>Registrar saída</h1>
+        <p className="mb-0 mt-2 text-sm text-neutral-500">
           {cliente.nome} — preencha os motivos antes de encerrar este cliente. Essa informação ajuda a mapear padrões
           de churn.
         </p>
       </div>
 
-      <Card>
+      {erro && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{erro}</p>}
+      <Card className="exit-form-card space-y-5">
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4"><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-red-700">Atenção · ação de encerramento</p><p className="mb-0 text-sm leading-relaxed text-red-900"><strong>Antes de confirmar:</strong> esta ação registra o motivo e muda o status do cliente para inativo. O histórico continuará disponível.</p></div>
+          <div className="border-b border-neutral-100 pb-3"><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-teal-800">Registro de saída</p><h2 className="mb-0 text-base font-semibold">Conte-nos o que aconteceu</h2><p className="mb-0 mt-1 text-xs text-neutral-500">Os campos ajudam a identificar oportunidades de melhoria.</p></div>
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Motivo principal</label>
             <select name="motivoPrincipal" required className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm" defaultValue="">
@@ -127,9 +147,12 @@ export default function FormularioSaidaPage() {
             Essa saída poderia ter sido evitada pela agência?
           </label>
 
-          <button type="submit" className="bg-red-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-red-700">
-            Confirmar saída e encerrar cliente
+          <div className="flex flex-wrap items-center gap-3 border-t border-neutral-100 pt-4">
+          <button type="submit" disabled={salvando} className="rounded-md bg-red-700 px-4 py-3 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50">
+            {salvando ? "Registrando saída…" : "Confirmar saída e encerrar cliente"}
           </button>
+          <Link href={`/clientes/detalhe?id=${id}`} className="rounded-md border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-50">Cancelar</Link>
+          </div>
         </form>
       </Card>
     </div>

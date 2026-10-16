@@ -68,8 +68,9 @@ export default function MotivosSaidaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Motivos de saída</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Relatórios</p>
+        <h1>Motivos de saída</h1>
+        <p className="mb-0 mt-2 text-sm text-neutral-500">
           {saidas.length} cliente(s) encerrado(s) · {evitaveis} marcado(s) como evitável(is)
         </p>
       </div>

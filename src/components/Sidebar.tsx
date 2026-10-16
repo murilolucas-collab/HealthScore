@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useAuth, getProjetoIdsDoUsuario, isAdminGeral, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { buscarDbRemoto } from "@/lib/github-sync";
@@ -10,86 +12,63 @@ import SidebarNavLink from "@/components/SidebarNavLink";
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const db = useDb();
+  const pathname = usePathname();
   const [syncAtivo, setSyncAtivo] = useState<boolean | null>(null);
+  const [aberto, setAberto] = useState(false);
 
   useEffect(() => {
-    if (!isAdminGeral(user ?? { nome: "", email: "", papel: "PADRAO" })) {
-      return;
-    }
+    if (!user || !isAdminGeral(user)) return;
     let cancelado = false;
     buscarDbRemoto().then((resultado) => {
-      if (!cancelado) setSyncAtivo(resultado.existe !== null);
+      if (!cancelado) setSyncAtivo(resultado.existe === true);
     });
-    return () => {
-      cancelado = true;
-    };
+    return () => { cancelado = true; };
   }, [user]);
 
-  if (!user || !db) return null;
+  if (!user || !db || pathname === "/login" || pathname.startsWith("/responder")) return null;
 
   const isAdmin = user.papel === "ADMIN";
-  const podeDashboard = temPermissao(user, "verDashboard");
-  const podeProjetos = temPermissao(user, "verProjetos");
-  const podeClientes = temPermissao(user, "verClientes");
   const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
-
   const projetos = db.projetos
     .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
-    .slice()
-    .sort((a, b) => a.nome.localeCompare(b.nome));
+    .slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   return (
-    <aside className="w-56 lg:w-64 shrink-0 border-r border-neutral-200 bg-white min-h-screen flex flex-col">
-      <div className="px-4 py-4 border-b border-neutral-200">
-        <Link href="/" className="text-base font-semibold text-neutral-900">
-          Saúde de Clientes
+    <>
+      <button type="button" className="mobile-menu-button" aria-label={aberto ? "Fechar navegação" : "Abrir navegação"} aria-expanded={aberto} onClick={() => setAberto(!aberto)}>
+        {aberto ? "×" : "☰"}
+      </button>
+      {aberto && <button className="fixed inset-0 z-20 bg-slate-950/35 md:hidden" aria-label="Fechar menu" onClick={() => setAberto(false)} />}
+      <aside className="app-sidebar" data-open={aberto}>
+        <Link href="/" className="brand-lockup" aria-label="3Pontos Company — início">
+          <Image src="/3pontos-company.jpg" alt="Logo 3Pontos Company" width={54} height={54} />
+          <span><strong>3PONTOS</strong><small>Company · HealthScore</small></span>
         </Link>
-      </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {podeDashboard && <SidebarNavLink href="/" exact>Dashboard</SidebarNavLink>}
-        {podeProjetos && <SidebarNavLink href="/projetos">Projetos</SidebarNavLink>}
-        {isAdminGeral(user) && (
-          <SidebarNavLink href="/admin/github">Sincronização GitHub</SidebarNavLink>
-        )}
-        {podeClientes && <SidebarNavLink href="/clientes">Clientes</SidebarNavLink>}
-        {isAdmin && (
-          <>
-            <SidebarNavLink href="/admin/usuarios">Usuários</SidebarNavLink>
-            <SidebarNavLink href="/admin/saidas">Motivos de Saída</SidebarNavLink>
-          </>
-        )}
+        <nav className="sidebar-nav" aria-label="Navegação principal" onClick={() => setAberto(false)}>
+          <div className="nav-section">Visão geral</div>
+          {temPermissao(user, "verDashboard") && <SidebarNavLink href="/" exact>▦　Dashboard</SidebarNavLink>}
+          {temPermissao(user, "verProjetos") && <SidebarNavLink href="/projetos">◫　Projetos</SidebarNavLink>}
+          {temPermissao(user, "verClientes") && <SidebarNavLink href="/clientes">♧　Clientes</SidebarNavLink>}
+          {isAdmin && <>
+            <div className="nav-section">Administração</div>
+            <SidebarNavLink href="/admin/usuarios">♙　Usuários e acessos</SidebarNavLink>
+            <SidebarNavLink href="/admin/saidas">↗　Relatório de saídas</SidebarNavLink>
+          </>}
+          {isAdminGeral(user) && <SidebarNavLink href="/admin/github">⟳　Sincronização</SidebarNavLink>}
+          {projetos.length > 0 && <>
+            <div className="nav-section">{isAdmin ? "Seus projetos" : "Projetos permitidos"}</div>
+            {projetos.map((p) => <SidebarNavLink key={p.id} href={`/projetos/detalhe?id=${p.id}`}>{p.nome}</SidebarNavLink>)}
+          </>}
+        </nav>
 
-        {projetos.length > 0 && (
-          <div className="pt-4 mt-4 border-t border-neutral-100">
-            <p className="px-3 pb-1 text-xs font-medium uppercase tracking-wide text-neutral-400">
-              {isAdmin ? "Todos os projetos" : "Meus projetos"}
-            </p>
-            {projetos.map((p) => (
-              <SidebarNavLink key={p.id} href={`/projetos/detalhe?id=${p.id}`}>
-                {p.nome}
-              </SidebarNavLink>
-            ))}
-          </div>
-        )}
-      </nav>
-
-      <div className="px-4 py-4 border-t border-neutral-200 text-sm">
-        {isAdminGeral(user) && <div className="mb-2 flex items-center gap-1.5 text-xs text-neutral-400">
-          <span className={`inline-block h-1.5 w-1.5 rounded-full ${syncAtivo === true ? "bg-emerald-500" : syncAtivo === false ? "bg-neutral-300" : "bg-neutral-200"}`} />
-          {syncAtivo === true ? "Sincronização automática ativa" : syncAtivo === false ? "Sincronização não configurada" : "Verificando sincronização..."}
-        </div>}
-        <div className="mb-2 text-neutral-700">
-          {user.nome} <span className="block text-xs uppercase text-neutral-400">{user.papel}</span>
-        </div>
-        <button
-          type="button"
-          onClick={logout}
-          className="text-neutral-500 hover:text-neutral-900 underline text-sm"
-        >
-          Sair
-        </button>
-      </div>
-    </aside>
+        <footer className="sidebar-footer">
+          {isAdminGeral(user) && <div className="sync-indicator"><i />{syncAtivo === true ? "Dados sincronizados" : syncAtivo === false ? "Sincronização indisponível" : "Verificando conexão…"}</div>}
+          <div className="profile-name">{user.nome}</div>
+          <div className="profile-role">{isAdminGeral(user) ? "Admin Geral" : user.papel === "ADMIN" ? "Administrador" : "Equipe 3Pontos"}</div>
+          <button type="button" onClick={logout}>Sair da conta　↗</button>
+        </footer>
+      </aside>
+    </>
   );
 }

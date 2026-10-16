@@ -2,70 +2,52 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-client";
+import Image from "next/image";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, pronto } = useAuth();
   const [erro, setErro] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErro(null);
     const formData = new FormData(e.currentTarget);
-    const email = String(formData.get("email") ?? "");
-    const senha = String(formData.get("senha") ?? "");
-    const resultado = login(email, senha);
-    if (!resultado.ok) {
-      setErro(resultado.erro);
-    }
+    const resultado = login(String(formData.get("email") ?? ""), String(formData.get("senha") ?? ""));
+    if (!resultado.ok) setErro(resultado.erro);
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-xl shadow-sm border border-neutral-200 p-8">
-        <h1 className="text-xl font-semibold text-neutral-900 mb-1">Saúde de Clientes</h1>
-        <p className="text-sm text-neutral-500 mb-6">
-          Entre para acessar seus projetos e o risco de churn.
-        </p>
-
-        {erro && (
-          <p className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-            {erro}
-          </p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              required
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              placeholder="ㅤ"
-            />
+    <div className="login-screen">
+      <section className="login-brand-panel">
+        <Image src="/3pontos-company.jpg" alt="Logo 3Pontos Company" width={92} height={92} priority />
+        <div>
+          <h1>Relacionamentos saudáveis. Resultados consistentes.</h1>
+          <p>Uma visão clara da experiência de cada cliente, dos projetos e das ações que fazem a diferença.</p>
+        </div>
+        <span className="text-xs tracking-[.18em] text-teal-100/70">3PONTOS COMPANY · HEALTHSCORE</span>
+      </section>
+      <section className="login-form-panel">
+        <div>
+          <div className="mb-8">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[.16em] text-teal-800">Área da equipe</p>
+            <h2 className="mb-2 text-2xl font-bold">Acesse sua conta</h2>
+            <p className="text-sm text-neutral-500">Entre para acompanhar seus clientes e projetos.</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Senha</label>
-            <input
-              type="password"
-              name="senha"
-              required
-              className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              placeholder="ㅤ"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-neutral-900 text-white rounded-md py-2 text-sm font-medium hover:bg-neutral-800 transition"
-          >
-            Entrar
-          </button>
-        </form>
-
-        <p className="mt-6 text-xs text-neutral-400">
-          -
-        </p>
-      </div>
+          {erro && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{erro}</p>}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <label className="block text-sm font-medium text-neutral-700">Email
+              <input type="email" name="email" autoComplete="username" required className="mt-2 w-full" placeholder="nome@3pontoscompany.com.br" />
+            </label>
+            <label className="block text-sm font-medium text-neutral-700">Senha
+              <input type="password" name="senha" autoComplete="current-password" required className="mt-2 w-full" placeholder="Sua senha" />
+            </label>
+            <button type="submit" disabled={!pronto} className="w-full bg-neutral-900 py-3 text-sm">
+              {!pronto ? "Preparando acesso…" : "Entrar no HealthScore"}
+            </button>
+          </form>
+          {!pronto && <p role="status" className="mt-4 text-center text-xs text-neutral-500">Conectando e carregando seus dados…</p>}
+        </div>
+      </section>
     </div>
   );
 }

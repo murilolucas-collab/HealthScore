@@ -260,12 +260,11 @@ export default function CicloClienteDetalhePage() {
         <span aria-hidden="true">/</span>
         <span className="text-neutral-900">{cliente.nome}</span>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">
-            {cliente.nome} · {projeto.nome}
-          </h1>
-          <p className="text-sm text-neutral-500">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Avaliação do cliente</p>
+          <h1>{cliente.nome}</h1>
+          <p className="mb-0 mt-2 text-sm text-neutral-500">
             Ciclo {format(new Date(ciclo.dataInicio), "dd/MM/yyyy", { locale: ptBR })}
             {ciclo.dataFim && ` – ${format(new Date(ciclo.dataFim), "dd/MM/yyyy", { locale: ptBR })}`} · Status: {ciclo.status}
           </p>

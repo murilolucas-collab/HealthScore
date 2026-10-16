@@ -201,32 +201,39 @@ export default function ClienteDetalhePage() {
         {projeto && <><Link href={`/projetos/detalhe?id=${projeto.id}`} className="hover:text-neutral-900 hover:underline">{projeto.nome}</Link><span aria-hidden="true">/</span></>}
         <span className="text-neutral-900">{cliente.nome}</span>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{cliente.nome}</h1>
-          <p className="text-sm text-neutral-500">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Perfil do cliente</p>
+          <h1>{cliente.nome}</h1>
+          <p className="mb-0 mt-2 text-sm text-neutral-500">
             {cliente.segmento ?? "Sem segmento"}
             {cliente.cnpj && ` · CNPJ ${cliente.cnpj}`}
             {cliente.inicioContrato &&
               ` · cliente desde ${format(new Date(cliente.inicioContrato), "MMM/yyyy", { locale: ptBR })}`}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <StatusBadge status={cliente.status} />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="grid gap-1">
+            <span className="text-[11px] font-medium text-neutral-500">Status manual</span>
+            <StatusBadge status={cliente.status} />
+          </div>
           {perfilRisco && (
-            <span className="text-xs text-neutral-500">
-              Propensão a risco: {perfilRisco.propensaoRisco.toFixed(0)} · {perfilRisco.tendencia}
-            </span>
+            <div className="grid gap-1">
+              <span className="text-[11px] font-medium text-neutral-500">Saúde calculada</span>
+              <span className="text-xs text-neutral-600">
+                Propensão a risco: {perfilRisco.propensaoRisco.toFixed(0)} · {perfilRisco.tendencia}
+              </span>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4">
         {cliente.status !== "INATIVO" ? (
           <>
             {podeAlterarStatus ? <form onSubmit={handleStatus} className="flex items-center gap-2">
-              <label className="text-sm text-neutral-600">Status do cliente:</label>
-              <select name="status" value={cliente.status} onChange={() => { setStatusSalvo(false); setErroStatus(""); }} disabled={salvandoStatus} className="rounded-md border border-neutral-300 px-2 py-1 text-sm disabled:opacity-60">
+              <label className="text-sm text-neutral-600">Status manual do cliente:</label>
+              <select name="status" defaultValue={cliente.status} onChange={() => { setStatusSalvo(false); setErroStatus(""); }} disabled={salvandoStatus} className="rounded-md border border-neutral-300 px-2 py-1 text-sm disabled:opacity-60">
                 <option value="ATIVO">Ativo</option>
                 <option value="EM_RISCO">Em risco</option>
               </select>

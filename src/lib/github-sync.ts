@@ -72,6 +72,11 @@ export async function salvarDbRemoto(db: Database): Promise<{ ok: true } | { ok:
 
 let sincronizando = false;
 
+function notificarSincronizacao(status: "salvando" | "salvo" | "erro", erro?: string) {
+  if (!isBrowser()) return;
+  window.dispatchEvent(new CustomEvent("healthscore-sync-state", { detail: { status, erro } }));
+}
+
 /**
  * Chamado uma vez ao carregar o app. Busca os dados mais recentes e
  * substitui os dados locais. Se o arquivo ainda não existir no
@@ -112,8 +117,12 @@ export function useGithubAutoSync() {
     function agendarSalvar() {
       if (sincronizando) return;
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      notificarSincronizacao("salvando");
       timeoutRef.current = setTimeout(() => {
-        salvarDbRemoto(getDb());
+        salvarDbRemoto(getDb()).then((resultado) => {
+          if (resultado.ok) notificarSincronizacao("salvo");
+          else notificarSincronizacao("erro", resultado.erro);
+        });
       }, 2500);
     }
     window.addEventListener("calculadora-db-changed", agendarSalvar);

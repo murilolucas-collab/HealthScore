@@ -109,39 +109,43 @@ export default function Home() {
   const categoriasAtivas = mediaPorCategoria("ATIVO");
   const categoriasPassivas = mediaPorCategoria("PASSIVO");
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-neutral-900">
-        Dashboard {isAdmin ? "geral" : "dos meus projetos"}
-      </h1>
+  const totalSaude = clientes.map((c) => c.riscoChurn?.scoreSaudeGeral).filter((n): n is number => typeof n === "number");
+  const mediaSaude = totalSaude.length ? totalSaude.reduce((a, b) => a + b, 0) / totalSaude.length : null;
+  const clientesAtencao = clientes.filter((c) => c.status === "EM_RISCO" || c.riscoChurn?.nivelRisco === "CRITICO" || c.riscoChurn?.nivelRisco === "ALTO").length;
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {ORDEM_RISCO.map((nivel) => (
-          <Card key={nivel} className="text-center">
-            <div className="text-2xl font-semibold text-neutral-900">{contagemPorNivel[nivel]}</div>
-            <RiscoBadge nivel={nivel} />
-          </Card>
-        ))}
+  return (
+    <div className="dashboard-page space-y-7">
+      <div className="dashboard-intro flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Central de relacionamento</p>
+          <h1>Visão geral {isAdmin ? "da operação" : "dos seus projetos"}</h1>
+          <p className="mt-2 text-sm text-neutral-500">Saúde dos clientes, riscos e próximos pontos de atenção.</p>
+        </div>
+        <div className="text-right text-xs text-neutral-500">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "full" }).format(new Date())}</div>
       </div>
 
-      <Card>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Card className="dashboard-kpi"><span className="kpi-label">Clientes acompanhados</span><strong>{clientes.length}</strong><span className="kpi-foot">{contagemStatus.INATIVO} inativos</span></Card>
+        <Card className="dashboard-kpi"><span className="kpi-label">Precisam de atenção</span><strong className="text-orange-700">{clientesAtencao}</strong><span className="kpi-foot">Risco manual, alto ou crítico</span></Card>
+        <Card className="dashboard-kpi"><span className="kpi-label">Saúde média calculada</span><strong>{mediaSaude === null ? "—" : mediaSaude.toFixed(1)}<small>{mediaSaude === null ? "" : " / 10"}</small></strong><span className="kpi-foot">{totalSaude.length} com avaliação</span></Card>
+        <Card className="dashboard-kpi"><span className="kpi-label">Projetos ativos</span><strong>{projetosVisiveis.filter((p) => p.status === "ATIVO").length}</strong><span className="kpi-foot">de {projetosVisiveis.length} disponíveis</span></Card>
+      </div>
+
+      <Card className="status-summary">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-medium text-neutral-900">Status dos clientes</h2>
-            <p className="text-xs text-neutral-500">O status manual continua visível mesmo antes do primeiro ciclo de saúde.</p>
-          </div>
-          <div className="flex gap-4 text-sm">
-            <span><strong>{contagemStatus.ATIVO}</strong> ativos</span>
-            <span className="text-orange-700"><strong>{contagemStatus.EM_RISCO}</strong> em risco</span>
-            <span className="text-neutral-500"><strong>{contagemStatus.INATIVO}</strong> inativos</span>
+          <div><h2 className="font-semibold">Status da carteira</h2><p className="mb-0 mt-1 text-xs text-neutral-500">Status manual, independente do health score calculado.</p></div>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-800">{contagemStatus.ATIVO} ativos</span>
+            <span className="rounded-full bg-orange-50 px-3 py-1.5 text-orange-800">{contagemStatus.EM_RISCO} em risco</span>
+            <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-neutral-600">{contagemStatus.INATIVO} inativos</span>
           </div>
         </div>
       </Card>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-5 xl:grid-cols-2">
         <Card>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-medium text-neutral-900">Clientes em maior risco</h2>
+            <div><h2 className="font-semibold">Clientes em maior risco</h2><p className="mb-0 mt-1 text-xs text-neutral-500">Priorize o contato com quem precisa de atenção.</p></div>
             {isAdmin && (
               <Link href="/clientes" className="text-xs underline text-neutral-500 hover:text-neutral-900">
                 ver todos
@@ -153,7 +157,7 @@ export default function Home() {
               <Link
                 key={c.id}
                 href={isAdmin ? `/clientes/detalhe?id=${c.id}` : `/projetos/detalhe?id=${c.projetoId}`}
-                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400"
+                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-3 hover:border-neutral-400"
               >
                 <div>
                   <div className="text-sm text-neutral-800">{c.nome}</div>
@@ -163,7 +167,7 @@ export default function Home() {
               </Link>
             ))}
             {clientesEmDestaque.length === 0 && (
-              <p className="text-sm text-neutral-500">Nenhum risco calculado ainda.</p>
+              <div className="empty-state"><span>✓</span><p>Nenhum risco calculado ainda.</p><small>Registre uma avaliação em um ciclo para acompanhar a saúde desta carteira.</small></div>
             )}
           </div>
         </Card>
@@ -180,7 +184,7 @@ export default function Home() {
               <Link
                 key={p.id}
                 href={`/projetos/detalhe?id=${p.id}`}
-                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-2 hover:border-neutral-400"
+                className="flex items-center justify-between rounded-md border border-neutral-200 px-3 py-3 hover:border-neutral-400"
               >
                 <div>
                   <div className="text-sm text-neutral-800">{p.nome}</div>
@@ -198,14 +202,14 @@ export default function Home() {
                 </div>
               </Link>
             ))}
-            {projetosComResumo.length === 0 && <p className="text-sm text-neutral-500">Nenhum projeto disponível.</p>}
+            {projetosComResumo.length === 0 && <div className="empty-state"><span>◫</span><p>Nenhum projeto disponível.</p><small>Quando houver projetos associados ao seu usuário, eles aparecerão aqui.</small></div>}
           </div>
         </Card>
       </div>
 
       {isAdmin && (
         <Card>
-          <h2 className="font-medium text-neutral-900 mb-3">Risco por CS (responsável)</h2>
+          <h2 className="font-semibold mb-3">Carteira por responsável</h2>
           <div className="space-y-2">
             {Array.from(porCS.values())
               .sort((a, b) => a.nome.localeCompare(b.nome))
@@ -231,7 +235,7 @@ export default function Home() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
-          <h2 className="font-medium text-neutral-900 mb-1">Nota média por categoria (NPS)</h2>
+          <h2 className="font-semibold mb-1">Experiência do cliente</h2>
           <p className="text-xs text-neutral-500 mb-4">
             Média do último ciclo calculado de cada cliente — atendimento, arte e tráfego.
           </p>
@@ -255,7 +259,7 @@ export default function Home() {
         </Card>
 
         <Card>
-          <h2 className="font-medium text-neutral-900 mb-1">Onde o time tem mais falhas</h2>
+          <h2 className="font-semibold mb-1">Qualidade da operação</h2>
           <p className="text-xs text-neutral-500 mb-4">
             Pilares do polo passivo ordenados do pior para o melhor — vermelho/âmbar indicam alerta.
           </p>

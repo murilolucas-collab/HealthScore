@@ -119,10 +119,11 @@ export default function UsuariosPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-neutral-900">Usuários</h1>
+      <div><p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Equipe e acessos</p><h1>Usuários</h1><p className="mb-0 mt-2 text-sm text-neutral-500">Configure permissões e projetos individualmente para cada pessoa.</p></div>
 
       <Card>
-        <h2 className="font-medium text-neutral-900 mb-3">Novo usuário</h2>
+        <h2 className="font-semibold text-neutral-900 mb-1">Adicionar pessoa à equipe</h2>
+        <p className="mb-4 text-sm text-neutral-500">Cada conta recebe seu próprio conjunto de módulos e projetos autorizados.</p>
         <form onSubmit={handleSubmit} className="grid md:grid-cols-4 gap-2">
           <input name="nome" placeholder="Nome" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
           <input name="email" type="email" placeholder="Email" required className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm" />
@@ -147,18 +148,20 @@ export default function UsuariosPage() {
       </Card>
 
       <div className="grid gap-3">
+        <p className="mb-0 text-xs font-semibold uppercase tracking-[.13em] text-neutral-500">Acessos individuais · {usuarios.length} usuário(s)</p>
         {usuarios.map((u) => (
-          <Card key={u.id} className="flex items-center justify-between">
-            <div>
-              <div className="font-medium text-neutral-900">{u.nome}</div>
+          <Card key={u.id} className="user-access-card grid gap-5 lg:grid-cols-[minmax(180px,.65fr)_minmax(0,1.35fr)]">
+            <div className="min-w-0">
+              <div className="font-semibold text-neutral-900">{u.nome}</div>
               <div className="text-sm text-neutral-500">{u.email}</div>
+              <span className="mt-3 inline-flex rounded-full bg-teal-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-teal-900">{isAdminGeral(u) ? "Admin Geral" : u.papel === "ADMIN" ? "Administrador" : "Acesso padrão"}</span>
               {u.papel === "PADRAO" && (
                 <div className="text-xs text-neutral-400 mt-1">
                   Projetos: {u.acessos.length > 0 ? u.acessos.map((p) => p!.nome).join(", ") : "nenhum ainda"}
                 </div>
               )}
             </div>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex min-w-0 flex-col gap-3">
               <span className="text-xs uppercase text-neutral-400">{u.papel}</span>
               {!isAdminGeral(u) && (
                 <form onSubmit={(e) => handlePermissoes(e, u.id)} className="grid grid-cols-2 gap-x-3 gap-y-1 rounded-md border border-neutral-200 bg-neutral-50 p-2">

@@ -27,6 +27,7 @@ export default function SidebarNavLink({
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={`block rounded-md px-3 py-2 text-sm transition ${
         active
           ? "bg-neutral-900 text-white font-medium"

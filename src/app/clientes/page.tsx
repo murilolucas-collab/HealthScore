@@ -12,6 +12,7 @@ export default function ClientesPage() {
   const db = useDb();
   const [busca, setBusca] = useState("");
   const [filtroProjeto, setFiltroProjeto] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("");
 
   if (!pronto || !db || !user) return null;
   if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
@@ -30,7 +31,7 @@ export default function ClientesPage() {
 
   const termoBusca = busca.trim().toLowerCase();
   const clientes = db.clientes
-    .filter((c) => (!projetosPermitidos || projetosPermitidos.has(c.projetoId)) && (filtroProjeto ? c.projetoId === filtroProjeto : true))
+    .filter((c) => (!projetosPermitidos || projetosPermitidos.has(c.projetoId)) && (filtroProjeto ? c.projetoId === filtroProjeto : true) && (!filtroStatus || c.status === filtroStatus))
     .filter((c) => (termoBusca ? c.nome.toLowerCase().includes(termoBusca) : true))
     .slice()
     .sort((a, b) => a.nome.localeCompare(b.nome))
@@ -44,24 +45,23 @@ export default function ClientesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-neutral-900">
-          Clientes <span className="text-sm font-normal text-neutral-400">({clientes.length})</span>
-        </h1>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div><p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Relacionamento</p><h1>Clientes <span className="text-base font-medium text-neutral-400">{clientes.length}</span></h1><p className="mb-0 mt-2 text-sm text-neutral-500">Consulte status, projeto e avaliação mais recente.</p></div>
         {podeGerenciar && <Link href="/clientes/novo" className="bg-neutral-900 text-white text-sm px-4 py-2 rounded-md hover:bg-neutral-800">+ Novo cliente</Link>}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid gap-2 rounded-xl border border-neutral-200 bg-white p-3 md:grid-cols-[1fr_220px_180px]">
         <input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
+          aria-label="Buscar cliente"
           placeholder="Buscar por nome..."
-          className="flex-1 min-w-[200px] rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="min-w-[200px]"
         />
         <select
           value={filtroProjeto}
           onChange={(e) => setFiltroProjeto(e.target.value)}
-          className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          aria-label="Filtrar por projeto"
         >
           <option value="">Todos os projetos</option>
           {projetos.map((p) => (
@@ -70,25 +70,28 @@ export default function ClientesPage() {
             </option>
           ))}
         </select>
+        <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} aria-label="Filtrar por status">
+          <option value="">Todos os status</option><option value="ATIVO">Ativo</option><option value="EM_RISCO">Em risco</option><option value="INATIVO">Inativo</option>
+        </select>
       </div>
 
       <div className="grid gap-3">
         {clientes.map(({ cliente, projeto, risco }) => (
-          <Card key={cliente.id} className="hover:border-neutral-400 transition flex items-center justify-between">
+          <Card key={cliente.id} className="client-list-card hover:border-neutral-400 transition flex items-center justify-between gap-4">
             <Link href={`/clientes/detalhe?id=${cliente.id}`} className="flex-1 min-w-0">
               <div className="font-medium text-neutral-900">{cliente.nome}</div>
               <div className="text-sm text-neutral-500">
                 {projeto?.nome ?? "Sem projeto"} · {cliente.segmento ?? "Sem segmento"}
               </div>
             </Link>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               <StatusBadge status={cliente.status} />
               <RiscoBadge nivel={risco?.nivelRisco} />
               {podeGerenciar && <button onClick={() => handleExcluir(cliente.id, cliente.nome)} className="text-xs text-red-600 underline hover:text-red-800">Excluir</button>}
             </div>
           </Card>
         ))}
-        {clientes.length === 0 && <p className="text-sm text-neutral-500">Nenhum cliente encontrado.</p>}
+        {clientes.length === 0 && <div className="empty-state"><span>♧</span><p>Nenhum cliente encontrado.</p><small>Altere os filtros para ver outros clientes{podeGerenciar ? " ou cadastre um novo cliente." : "."}</small></div>}
       </div>
     </div>
   );

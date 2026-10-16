@@ -194,10 +194,11 @@ export default function ProjetoDetalhePage() {
         <span aria-hidden="true">/</span>
         <span className="text-neutral-900">{projeto.nome}</span>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{projeto.nome}</h1>
-          <p className="text-sm text-neutral-500">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Projeto · carteira e avaliações</p>
+          <h1>{projeto.nome}</h1>
+          <p className="mb-0 mt-2 text-sm text-neutral-500">
             {totalClientes} cliente{totalClientes === 1 ? "" : "s"}
             {csResponsavel && ` · CS: ${csResponsavel.nome}`}
           </p>
@@ -229,10 +230,8 @@ export default function ProjetoDetalhePage() {
       </div>
 
       <Card>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-medium text-neutral-900">
-            Clientes <span className="text-sm font-normal text-neutral-400">({totalClientes})</span>
-          </h2>
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <div><h2 className="mb-0 font-semibold text-neutral-900">Clientes deste projeto</h2><p className="mb-0 mt-1 text-xs text-neutral-500">{totalClientes} cliente(s)</p></div>
           {isAdmin && (
             <Link href={`/clientes/novo?projetoId=${id}`} className="bg-neutral-900 text-white text-sm px-3 py-1.5 rounded-md hover:bg-neutral-800">
               + Novo cliente
@@ -242,8 +241,9 @@ export default function ProjetoDetalhePage() {
         <input
           value={buscaCliente}
           onChange={(e) => setBuscaCliente(e.target.value)}
+          aria-label="Buscar cliente neste projeto"
           placeholder="Buscar cliente por nome..."
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm mb-3"
+          className="mb-3 w-full"
         />
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {clientes.map((c) => (
@@ -275,7 +275,8 @@ export default function ProjetoDetalhePage() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
-          <h2 className="font-medium text-neutral-900 mb-3">Ciclo de avaliação</h2>
+          <h2 className="font-semibold text-neutral-900 mb-1">Ciclos de avaliação</h2>
+          <p className="mb-3 text-xs text-neutral-500">Configure a frequência e acompanhe respostas ativas e avaliações da equipe.</p>
           <p className="text-xs text-neutral-500 mb-3">
             Um ciclo cobre todos os clientes do projeto de uma vez — cada cliente tem seu próprio health score dentro dele.
           </p>
