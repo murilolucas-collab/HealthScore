@@ -7,6 +7,22 @@
       "senhaHash": "$2b$10$rkiUXzxMW.Tnz/znqKXMHeT8dz8JFDVetRTW06h73mjxQUV0Iza6y",
       "papel": "ADMIN",
       "criadoEm": "2026-10-02T18:52:58.994Z"
+    },
+    {
+      "id": "usuario_90a12043-0802-40e5-bd5d-42ffbdb1cec5",
+      "nome": "teste",
+      "email": "teste@gmail.com",
+      "senhaHash": "$2b$10$2UfvtgSpv83L9GcLFTOAculHC8ZmCZfjaKr7KDkJjwJYyaXkK58g2",
+      "papel": "PADRAO",
+      "permissoes": {
+        "verDashboard": true,
+        "verProjetos": true,
+        "verClientes": true,
+        "gerenciarClientes": true,
+        "alterarStatusCliente": true,
+        "calcularSaude": true
+      },
+      "criadoEm": "2026-10-16T12:13:50.965Z"
     }
   ],
   "acessosProjeto": [],
