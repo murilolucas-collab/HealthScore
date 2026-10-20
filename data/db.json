@@ -9,7 +9,7 @@
       "criadoEm": "2026-10-02T18:52:58.994Z",
       "permissoes": {
         "verDashboard": true,
-        "verProjetos": false,
+        "verProjetos": true,
         "verClientes": true,
         "gerenciarClientes": true,
         "calcularSaude": true,
@@ -50,10 +50,10 @@
       "criadoEm": "2026-10-16T12:27:56.456Z"
     },
     {
-      "id": "acesso_59e7c910-b96d-48d3-a07f-5e4850e6dc6a",
+      "id": "acesso_aeeead43-a81a-4105-89bf-bab66560a2dd",
       "usuarioId": "usuario_d439f41a-db8d-4fc5-bf92-71507cfa85ae",
       "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
-      "criadoEm": "2026-10-20T13:35:27.571Z"
+      "criadoEm": "2026-10-20T13:35:36.666Z"
     }
   ],
   "clientes": [
