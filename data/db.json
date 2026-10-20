@@ -65,7 +65,17 @@
       "criadoEm": "2026-10-05T12:29:52.095Z"
     }
   ],
-  "metasCliente": [],
+  "metasCliente": [
+    {
+      "id": "meta_9abbc567-5fa0-4e50-9b92-af6e0b1901ce",
+      "clienteId": "cliente_a8878c41-eaf2-48b0-8953-2856ec35a2ed",
+      "nome": "TESTE",
+      "valorAlvo": 10000,
+      "unidade": "1",
+      "ativa": true,
+      "criadoEm": "2026-10-20T12:40:34.659Z"
+    }
+  ],
   "registrosMeta": [],
   "formulariosSaida": [
     {
