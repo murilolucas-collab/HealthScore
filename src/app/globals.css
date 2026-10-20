@@ -133,6 +133,62 @@ a[class*="hover:underline"]:hover { color: var(--brand); }
 .sync-notice-error { border-color: #ecc8c3; background: #fff6f4; color: #923c37; }
 .sync-notice-error > span { background: #f5dfdc; }
 
+/* Access management modal: dense enough for admin work, calm enough to scan. */
+.access-modal-backdrop { position: fixed; z-index: 80; inset: 0; display: grid; place-items: center; overflow: auto; background: rgb(6 31 39 / 58%); padding: 24px; }
+.access-modal { display: flex; width: min(100%, 900px); max-height: min(780px, calc(100dvh - 48px)); flex-direction: column; overflow: hidden; border: 1px solid #c8d9dc; border-radius: 18px; background: #f8fbfb; box-shadow: 0 28px 90px rgb(3 25 32 / 30%); }
+.access-modal-header { display: flex; min-height: 116px; align-items: flex-start; justify-content: space-between; gap: 24px; border-bottom: 1px solid #dce7e8; background: white; padding: 26px 30px 22px; }
+.access-modal-kicker, .access-section-eyebrow { margin: 0 0 6px; color: #147083; font-size: 10px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+.access-modal-title { margin: 0; color: var(--ink); font-size: 24px; letter-spacing: -.04em; line-height: 1.2; }
+.access-modal-subtitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 9px 0 0; color: #667980; font-size: 13px; }
+.access-modal-subtitle strong { color: #143e4a; }
+.access-modal-close { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border: 1px solid #d6e2e4; border-radius: 10px; background: white; color: #49616a; cursor: pointer; transition: background .16s ease, color .16s ease, border-color .16s ease; }
+.access-modal-close:hover { border-color: #94b8be; background: #eff8f8; color: #063d4e; }
+.access-modal-protected, .access-modal-warning { display: flex; align-items: flex-start; gap: 11px; margin: 18px 30px 0; border: 1px solid #b9ddd0; border-radius: 11px; background: #effaf5; padding: 12px 14px; color: #135e47; font-size: 12px; line-height: 1.45; }
+.access-modal-protected > span:last-child { display: grid; gap: 2px; }
+.access-modal-protected small { color: #28735e; font-size: 12px; }
+.access-modal-protected-icon { display: grid; width: 28px; height: 28px; flex: 0 0 28px; place-items: center; border-radius: 8px; background: #d8f0e5; }
+.access-modal-warning { display: block; border-color: #efdfae; background: #fff8e6; color: #85570a; }
+.access-modal-warning strong { color: #684205; }
+.access-modal-body { display: grid; min-height: 0; grid-template-columns: 188px minmax(0, 1fr); flex: 1; }
+.access-tabs { display: flex; flex-direction: column; gap: 4px; border-right: 1px solid #dce7e8; background: #f1f7f7; padding: 20px 12px; }
+.access-tab { display: flex; min-height: 52px; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid transparent; border-radius: 10px; background: transparent; padding: 10px 12px; color: #49616a; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; transition: background .16s ease, color .16s ease, border-color .16s ease; }
+.access-tab:hover { background: #e6f2f3; color: #123f4b; }
+.access-tab small { color: #82959a; font-size: 10px; font-weight: 700; }
+.access-tab-active { border-color: #b9dadd; background: white; color: #07566b; box-shadow: 0 2px 8px rgb(16 42 53 / 5%); }
+.access-tab-active small { color: #147083; }
+.access-panel { min-width: 0; overflow: auto; background: #fbfdfd; }
+.access-panel-content { display: grid; gap: 22px; padding: 28px 30px 30px; }
+.access-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 22px; }
+.access-section-heading h3 { margin: 0; color: #153f4b; font-size: 21px; letter-spacing: -.035em; }
+.access-section-heading p:not(.access-section-eyebrow) { max-width: 530px; margin: 7px 0 0; color: #64777d; font-size: 13px; line-height: 1.55; }
+.access-count-pill { flex: 0 0 auto; border: 1px solid #c5dfe1; border-radius: 999px; background: #edf8f8; padding: 7px 10px; color: #0b6272; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.access-check-list, .project-access-list { display: grid; gap: 9px; }
+.access-check-row, .project-access-row { display: flex; min-width: 0; align-items: flex-start; gap: 12px; border: 1px solid #dce7e8; border-radius: 11px; background: white; padding: 14px; cursor: pointer; transition: border-color .16s ease, background .16s ease, box-shadow .16s ease; }
+.access-check-row:hover, .project-access-row:hover { border-color: #9fc3c8; background: #fbffff; box-shadow: 0 3px 10px rgb(16 42 53 / 4%); }
+.access-check-row input, .project-access-row input { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 1px; accent-color: #0b7281; cursor: pointer; }
+.access-check-copy { display: grid; gap: 4px; min-width: 0; }
+.access-check-title { color: #21444e; font-size: 13px; font-weight: 700; }
+.access-check-description { color: #71848a; font-size: 12px; line-height: 1.45; }
+.access-check-row-disabled, .project-access-row.access-check-row-disabled { cursor: default; opacity: .72; }
+.access-check-row-disabled:hover { border-color: #dce7e8; background: white; box-shadow: none; }
+.project-access-row { align-items: center; padding: 12px 14px; color: #29434d; font-size: 13px; }
+.access-inline-note { display: flex; align-items: flex-start; gap: 9px; border-radius: 10px; background: #f0f7f7; padding: 11px 12px; color: #45646d; font-size: 12px; line-height: 1.5; }
+.access-inline-note > span { display: grid; width: 18px; height: 18px; flex: 0 0 18px; place-items: center; border: 1px solid #a7c9cd; border-radius: 50%; color: #147083; font-size: 11px; font-weight: 800; }
+.access-inline-note p { margin: 0; }
+.access-inline-note strong { color: #164957; }
+.access-empty { display: grid; justify-items: start; border: 1px dashed #bed3d6; border-radius: 12px; background: #f7fbfb; padding: 24px; }
+.access-empty > span { font-size: 24px; color: #6fa1a7; }
+.access-empty strong { margin-top: 12px; color: #21444e; font-size: 13px; }
+.access-empty p { margin: 5px 0 0; color: #73868b; font-size: 12px; }
+.access-modal-footer { display: flex; min-height: 76px; align-items: center; justify-content: space-between; gap: 14px; border-top: 1px solid #dce7e8; background: white; padding: 16px 30px; }
+.access-modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; }
+.access-save-status { min-height: 20px; color: #6c7f85; font-size: 12px; }
+.access-save-status-success { color: #167a5a; font-weight: 700; }
+.access-save-status-error { color: #a53636; font-weight: 700; }
+.user-access-summary { display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid #edf2f3; padding-top: 12px; }
+.user-access-summary span { border: 1px solid #dce7e8; border-radius: 999px; background: #f8fbfb; padding: 5px 9px; color: #6a7d83; font-size: 11px; }
+.user-access-summary strong { color: #185363; }
+
 @media (max-width: 760px) {
   body:has(.app-sidebar) { display: block; }
   .app-sidebar { position: fixed; inset: 0 auto 0 0; width: min(290px, 86vw); height: 100dvh; transform: translateX(-102%); transition: transform .22s ease; box-shadow: 14px 0 40px rgb(3 25 32 / 22%); }
@@ -147,6 +203,21 @@ a[class*="hover:underline"]:hover { color: var(--brand); }
   .login-form-panel { padding: 28px 22px 48px; }
   [class*="grid-cols-3"]:not(.user-create-form), [class*="grid-cols-4"]:not(.user-create-form) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   [class*="flex items-center justify-between"] { flex-wrap: wrap; }
+  .access-modal-backdrop { place-items: end center; padding: 0; }
+  .access-modal { width: 100%; max-height: 100dvh; border-radius: 18px 18px 0 0; }
+  .access-modal-header { min-height: 102px; padding: 21px 18px 17px; }
+  .access-modal-title { font-size: 21px; }
+  .access-modal-protected, .access-modal-warning { margin-inline: 18px; }
+  .access-modal-body { display: flex; flex-direction: column; }
+  .access-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; overflow-x: auto; border-right: 0; border-bottom: 1px solid #dce7e8; padding: 10px; }
+  .access-tab { min-height: 48px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; padding: 7px 9px; font-size: 11px; }
+  .access-tab small { font-size: 9px; }
+  .access-panel-content { gap: 18px; padding: 22px 18px 24px; }
+  .access-section-heading { display: grid; gap: 12px; }
+  .access-count-pill { justify-self: start; }
+  .access-modal-footer { align-items: flex-end; padding: 13px 18px; }
+  .access-modal-actions { width: 100%; }
+  .access-modal-actions .action-button { width: auto; flex: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }

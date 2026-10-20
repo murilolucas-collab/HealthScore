@@ -49,7 +49,18 @@ export type ModuloUsuario =
   | "gerenciarClientes"
   | "calcularSaude";
 
-export type PermissoesUsuario = Partial<Record<ModuloUsuario, boolean>>;
+export type FuncaoCliente = "visualizar" | "alterarStatus";
+export type FuncaoContato = "visualizar" | "gerenciar" | "gerenciarMetasEventos";
+
+/**
+ * The flat module keys are the legacy permission contract. The nested groups
+ * are additive so old records can keep working while the access modal stores
+ * more precise capabilities.
+ */
+export type PermissoesUsuario = Partial<Record<ModuloUsuario, boolean>> & {
+  clientes?: Partial<Record<FuncaoCliente, boolean>>;
+  contatos?: Partial<Record<FuncaoContato, boolean>>;
+};
 
 export interface Usuario {
   id: string;

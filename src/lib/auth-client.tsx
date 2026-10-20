@@ -10,7 +10,7 @@ import { useRouter, usePathname } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { getDb } from "./store";
 import { sincronizarNaInicializacao } from "./github-sync";
-import type { ModuloUsuario, PapelUsuario, Usuario } from "./types";
+import type { FuncaoCliente, FuncaoContato, ModuloUsuario, PapelUsuario, Usuario } from "./types";
 
 const SESSION_KEY = "calculadora-churn-session-v1";
 
@@ -37,6 +37,17 @@ export const PERMISSOES_TOTAIS: Record<ModuloUsuario, boolean> = {
   calcularSaude: true,
 };
 
+export const FUNCOES_CLIENTES_TOTAIS: Record<FuncaoCliente, boolean> = {
+  visualizar: true,
+  alterarStatus: true,
+};
+
+export const FUNCOES_CONTATOS_TOTAIS: Record<FuncaoContato, boolean> = {
+  visualizar: true,
+  gerenciar: true,
+  gerenciarMetasEventos: true,
+};
+
 export function isAdminGeral(user: Pick<SessionUser, "nome" | "email" | "papel">) {
   // O nome é editável e não pode conceder privilégios. O email-raiz é único
   // (a criação de usuários rejeita duplicatas) e permanece como identificador
@@ -55,6 +66,41 @@ export function permissoesEfetivas(
   if (usuario.papel === "ADMIN" && !usuario.permissoes) return PERMISSOES_TOTAIS;
 
   return { ...PERMISSOES_PADRAO, ...(usuario.permissoes ?? {}) };
+}
+
+export function funcoesClientesEfetivas(
+  usuario: Pick<Usuario, "nome" | "email" | "papel" | "permissoes">
+): Record<FuncaoCliente, boolean> {
+  if (isAdminGeral(usuario) || (usuario.papel === "ADMIN" && !usuario.permissoes)) return FUNCOES_CLIENTES_TOTAIS;
+  const modulos = permissoesEfetivas(usuario);
+  return {
+    visualizar: modulos.verClientes,
+    alterarStatus: modulos.gerenciarClientes,
+    ...(usuario.permissoes?.clientes ?? {}),
+  };
+}
+
+export function funcoesContatosEfetivas(
+  usuario: Pick<Usuario, "nome" | "email" | "papel" | "permissoes">
+): Record<FuncaoContato, boolean> {
+  if (isAdminGeral(usuario) || (usuario.papel === "ADMIN" && !usuario.permissoes)) return FUNCOES_CONTATOS_TOTAIS;
+  const modulos = permissoesEfetivas(usuario);
+  return {
+    visualizar: modulos.verClientes,
+    gerenciar: modulos.gerenciarClientes,
+    gerenciarMetasEventos: modulos.gerenciarClientes,
+    ...(usuario.permissoes?.contatos ?? {}),
+  };
+}
+
+export function temFuncaoCliente(user: SessionUser, funcao: FuncaoCliente) {
+  const usuario = getDb().usuarios.find((u) => u.id === user.id);
+  return funcoesClientesEfetivas(usuario ?? user)[funcao];
+}
+
+export function temFuncaoContato(user: SessionUser, funcao: FuncaoContato) {
+  const usuario = getDb().usuarios.find((u) => u.id === user.id);
+  return funcoesContatosEfetivas(usuario ?? user)[funcao];
 }
 
 export function temPermissao(user: SessionUser, modulo: ModuloUsuario) {
