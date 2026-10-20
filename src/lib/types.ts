@@ -3,7 +3,7 @@
 // no localStorage do navegador — não há mais servidor nem banco de dados.
 
 export type PapelUsuario = "ADMIN" | "PADRAO";
-export type StatusCliente = "ATIVO" | "EM_RISCO" | "INATIVO";
+export type StatusCliente = "NEUTRO" | "SAUDAVEL" | "EM_RISCO" | "INATIVO";
 export type StatusProjeto = "ATIVO" | "PAUSADO" | "ENCERRADO";
 export type Periodicidade = "MENSAL" | "TRIMESTRAL" | "SEMESTRAL" | "ANUAL" | "PERSONALIZADO";
 export type Nicho = "COMUNICACAO" | "ARTE" | "GESTAO_TRAFEGO";
@@ -47,7 +47,6 @@ export type ModuloUsuario =
   | "verProjetos"
   | "verClientes"
   | "gerenciarClientes"
-  | "alterarStatusCliente"
   | "calcularSaude";
 
 export type PermissoesUsuario = Partial<Record<ModuloUsuario, boolean>>;
@@ -59,6 +58,8 @@ export interface Usuario {
   senhaHash: string;
   papel: PapelUsuario;
   permissoes?: PermissoesUsuario;
+  /** Ausente em admins legados: preserva acesso anterior até configuração explícita. */
+  escopoProjetosConfigurado?: boolean;
   criadoEm: string;
 }
 

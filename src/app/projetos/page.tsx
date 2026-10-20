@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, isAdminGeral, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, excluirProjeto } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
@@ -22,10 +22,10 @@ export default function ProjetosPage() {
   }
 
   const isAdmin = user.papel === "ADMIN";
-  const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
+  const projetoIds = getProjetoIdsDoUsuario(user.id);
 
   const projetos = db.projetos
-    .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
+    .filter((p) => (isAdminGeral(user) ? true : projetoIds.includes(p.id)))
     .map((p) => {
       const clientesDoProjeto = db.clientes.filter((c) => c.projetoId === p.id);
       const niveis = clientesDoProjeto
@@ -59,7 +59,7 @@ export default function ProjetosPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="mb-2 text-xs font-semibold uppercase tracking-[.15em] text-teal-800">Carteira de trabalho</p><h1>Projetos</h1><p className="mb-0 mt-2 text-sm text-neutral-500">Acompanhe clientes, ciclos e saúde de cada frente.</p></div>
-        {isAdmin && (
+        {isAdminGeral(user) && (
           <Link href="/projetos/novo" className="action-button action-primary">
             + Novo projeto
           </Link>

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, isAdminGeral, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { Card, StatusBadge, RiscoBadge, CategoriaLabel } from "@/components/ui";
 import type { NivelRisco } from "@/lib/types";
-import { obterResumoSaudeProjeto } from "@/lib/churn";
+import { obterResumoSaudeProjeto, obterStatusSaudeCliente } from "@/lib/churn";
 
 const ORDEM_RISCO: NivelRisco[] = ["CRITICO", "ALTO", "MEDIO", "BAIXO"];
 
@@ -25,15 +25,16 @@ export default function Home() {
   }
 
   const isAdmin = user.papel === "ADMIN";
-  const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
+  const projetoIds = getProjetoIdsDoUsuario(user.id);
 
-  const projetosVisiveis = db.projetos.filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)));
+  const projetosVisiveis = db.projetos.filter((p) => (isAdminGeral(user) ? true : projetoIds.includes(p.id)));
   const projetoIdsVisiveis = new Set(projetosVisiveis.map((p) => p.id));
 
   const clientes = db.clientes
     .filter((c) => projetoIdsVisiveis.has(c.projetoId) && c.status !== "INATIVO")
     .map((c) => ({
       ...c,
+      status: obterStatusSaudeCliente(db, c),
       projeto: db.projetos.find((p) => p.id === c.projetoId),
       riscoChurn: db.riscosChurn
         .filter((r) => r.clienteId === c.id)
@@ -64,8 +65,9 @@ export default function Home() {
         ...p,
         csResponsavel: db.usuarios.find((u) => u.id === p.csResponsavelId) ?? null,
         totalClientes: clientesDoProjeto.length,
-        clientesAtivos: clientesDoProjeto.filter((c) => c.status === "ATIVO").length,
+        clientesSaudaveis: clientesDoProjeto.filter((c) => c.status === "SAUDAVEL").length,
         clientesEmRisco: clientesDoProjeto.filter((c) => c.status === "EM_RISCO").length,
+        clientesNeutros: clientesDoProjeto.filter((c) => c.status === "NEUTRO").length,
         contagem,
         saude: obterResumoSaudeProjeto(db, p.id),
       };
@@ -73,8 +75,9 @@ export default function Home() {
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
   const contagemStatus = {
-    ATIVO: clientes.filter((c) => c.status === "ATIVO").length,
+    SAUDAVEL: clientes.filter((c) => c.status === "SAUDAVEL").length,
     EM_RISCO: clientes.filter((c) => c.status === "EM_RISCO").length,
+    NEUTRO: clientes.filter((c) => c.status === "NEUTRO").length,
     INATIVO: db.clientes.filter((c) => projetoIdsVisiveis.has(c.projetoId) && c.status === "INATIVO").length,
   };
 
@@ -113,7 +116,7 @@ export default function Home() {
 
   const totalSaude = clientes.map((c) => c.riscoChurn?.scoreSaudeGeral).filter((n): n is number => typeof n === "number");
   const mediaSaude = totalSaude.length ? totalSaude.reduce((a, b) => a + b, 0) / totalSaude.length : null;
-  const clientesAtencao = clientes.filter((c) => c.status === "EM_RISCO" || c.riscoChurn?.nivelRisco === "CRITICO" || c.riscoChurn?.nivelRisco === "ALTO").length;
+  const clientesAtencao = clientes.filter((c) => c.status === "EM_RISCO").length;
 
   return (
     <div className="dashboard-page space-y-7">
@@ -128,17 +131,18 @@ export default function Home() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="dashboard-kpi"><span className="kpi-label">Clientes acompanhados</span><strong>{clientes.length}</strong><span className="kpi-foot">{contagemStatus.INATIVO} inativos</span></Card>
-        <Card className="dashboard-kpi"><span className="kpi-label">Precisam de atenção</span><strong className="text-orange-700">{clientesAtencao}</strong><span className="kpi-foot">Risco manual, alto ou crítico</span></Card>
+        <Card className="dashboard-kpi"><span className="kpi-label">Precisam de atenção</span><strong className="text-orange-700">{clientesAtencao}</strong><span className="kpi-foot">Avaliação mais recente abaixo de 8</span></Card>
         <Card className="dashboard-kpi"><span className="kpi-label">Saúde média calculada</span><strong>{mediaSaude === null ? "—" : mediaSaude.toFixed(1)}<small>{mediaSaude === null ? "" : " / 10"}</small></strong><span className="kpi-foot">{totalSaude.length} com avaliação</span></Card>
         <Card className="dashboard-kpi"><span className="kpi-label">Projetos ativos</span><strong>{projetosVisiveis.filter((p) => p.status === "ATIVO").length}</strong><span className="kpi-foot">de {projetosVisiveis.length} disponíveis</span></Card>
       </div>
 
       <Card className="status-summary">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="font-semibold">Status da carteira</h2><p className="mb-0 mt-1 text-xs text-neutral-500">Status manual, independente do health score calculado.</p></div>
+          <div><h2 className="font-semibold">Saúde da carteira</h2><p className="mb-0 mt-1 text-xs text-neutral-500">Classificação automática pela avaliação mais recente; sem avaliação, o cliente fica neutro.</p></div>
           <div className="flex flex-wrap gap-2 text-sm">
-            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-800">{contagemStatus.ATIVO} ativos</span>
+            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-800">{contagemStatus.SAUDAVEL} saudáveis</span>
             <span className="rounded-full bg-orange-50 px-3 py-1.5 text-orange-800">{contagemStatus.EM_RISCO} em risco</span>
+            <span className="rounded-full bg-neutral-50 px-3 py-1.5 text-neutral-600">{contagemStatus.NEUTRO} neutros</span>
             <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-neutral-600">{contagemStatus.INATIVO} inativos</span>
           </div>
         </div>
@@ -191,7 +195,7 @@ export default function Home() {
                 <div>
                   <div className="text-sm text-neutral-800">{p.nome}</div>
                   <div className="text-xs text-neutral-500">
-                    {p.clientesAtivos} {p.clientesAtivos === 1 ? "ativo" : "ativos"} · {p.clientesEmRisco} em risco
+                    {p.clientesSaudaveis} {p.clientesSaudaveis === 1 ? "saudável" : "saudáveis"} · {p.clientesEmRisco} em risco · {p.clientesNeutros} neutros
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

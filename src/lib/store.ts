@@ -7,7 +7,7 @@
 // acessa o app em qualquer dispositivo.
 
 import bcrypt from "bcryptjs";
-import type { Database } from "./types";
+import type { Database, Usuario } from "./types";
 
 const STORAGE_KEY = "calculadora-churn-db-v1";
 
@@ -79,6 +79,29 @@ export function mutateDb<T>(fn: (db: Database) => T): T {
   const resultado = fn(db);
   writeDb(db);
   return resultado;
+}
+
+/**
+ * Converts an ADMIN's legacy implicit all-project access into explicit grants
+ * before an incremental grant/revoke. This prevents one project edit from
+ * silently dropping access to every other project.
+ */
+export function materializarEscopoProjetosUsuario(db: Database, usuario: Usuario) {
+  if (usuario.papel === "ADMIN" && usuario.escopoProjetosConfigurado !== true) {
+    const projetosJaConcedidos = new Set(
+      db.acessosProjeto.filter((acesso) => acesso.usuarioId === usuario.id).map((acesso) => acesso.projetoId)
+    );
+    for (const projeto of db.projetos) {
+      if (projetosJaConcedidos.has(projeto.id)) continue;
+      db.acessosProjeto.push({
+        id: novoId("acesso"),
+        usuarioId: usuario.id,
+        projetoId: projeto.id,
+        criadoEm: new Date().toISOString(),
+      });
+    }
+  }
+  usuario.escopoProjetosConfigurado = true;
 }
 
 export function limparTudo() {

@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAuth, podeAcessarProjeto } from "@/lib/auth-client";
+import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
+import { obterStatusSaudeCliente } from "@/lib/churn";
 
 export default function CicloRosterPage() {
   const searchParams = useSearchParams();
@@ -18,6 +19,7 @@ export default function CicloRosterPage() {
   const [busca, setBusca] = useState("");
 
   if (!pronto || !db || !user) return null;
+  if (!temPermissao(user, "verProjetos")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar projetos.</p>;
   if (!podeAcessarProjeto(user, projetoId)) return <p className="text-sm text-neutral-500">Sem acesso a este projeto.</p>;
 
   const ciclo = db.ciclosAvaliacao.find((c) => c.id === cicloId && c.projetoId === projetoId);
@@ -30,6 +32,7 @@ export default function CicloRosterPage() {
     .filter((c) => (termoBusca ? c.nome.toLowerCase().includes(termoBusca) : true))
     .map((c) => ({
       ...c,
+      status: obterStatusSaudeCliente(db, c),
       risco: db.riscosChurn.find((r) => r.cicloId === cicloId && r.clienteId === c.id),
       totalRespostas:
         db.respostasAtivas.filter((r) => r.cicloId === cicloId && db.contatosCliente.find((ct) => ct.id === r.contatoClienteId)?.clienteId === c.id).length +

@@ -28,9 +28,10 @@ export default function Sidebar() {
   if (!user || !db || pathname === "/login" || pathname.startsWith("/responder")) return null;
 
   const isAdmin = user.papel === "ADMIN";
-  const projetoIds = isAdmin ? null : getProjetoIdsDoUsuario(user.id);
+  const adminGeral = isAdminGeral(user);
+  const projetoIds = getProjetoIdsDoUsuario(user.id);
   const projetos = db.projetos
-    .filter((p) => (isAdmin ? true : projetoIds?.includes(p.id)))
+    .filter((p) => (adminGeral ? true : projetoIds.includes(p.id)))
     .slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   return (
@@ -57,7 +58,7 @@ export default function Sidebar() {
           </>}
           {isAdminGeral(user) && <SidebarNavLink href="/admin/github">⟳　Sincronização</SidebarNavLink>}
           {projetos.length > 0 && <>
-            <div className="nav-section">{isAdmin ? "Seus projetos" : "Projetos permitidos"}</div>
+            <div className="nav-section">{adminGeral ? "Todos os projetos" : "Projetos permitidos"}</div>
             {projetos.map((p) => <SidebarNavLink key={p.id} href={`/projetos/detalhe?id=${p.id}`}>{p.nome}</SidebarNavLink>)}
           </>}
         </nav>

@@ -32,6 +32,8 @@ export function RiscoBadge({ nivel }: { nivel: string | null | undefined }) {
 
 const STATUS_STYLES: Record<string, string> = {
   ATIVO: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  SAUDAVEL: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  NEUTRO: "bg-neutral-50 text-neutral-600 border-neutral-200",
   EM_RISCO: "bg-orange-50 text-orange-800 border-orange-200",
   INATIVO: "bg-neutral-100 text-neutral-600 border-neutral-200",
   PAUSADO: "bg-amber-50 text-amber-800 border-amber-200",
@@ -42,6 +44,8 @@ const STATUS_STYLES: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, string> = {
   ATIVO: "Ativo",
+  SAUDAVEL: "Saudável",
+  NEUTRO: "Neutro",
   EM_RISCO: "Em risco",
   INATIVO: "Inativo",
   PAUSADO: "Pausado",

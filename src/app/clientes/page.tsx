@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, isAdminGeral, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, excluirCliente } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
+import { obterStatusSaudeCliente } from "@/lib/churn";
 
 export default function ClientesPage() {
   const { user, pronto } = useAuth();
@@ -13,11 +14,12 @@ export default function ClientesPage() {
   const [busca, setBusca] = useState("");
   const [filtroProjeto, setFiltroProjeto] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
+  const [filtroOperacional, setFiltroOperacional] = useState("");
 
   if (!pronto || !db || !user) return null;
   if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
   const podeGerenciar = temPermissao(user, "gerenciarClientes");
-  const projetosPermitidos = user.papel === "ADMIN" ? null : new Set(getProjetoIdsDoUsuario(user.id));
+  const projetosPermitidos = isAdminGeral(user) ? null : new Set(getProjetoIdsDoUsuario(user.id));
 
   function handleExcluir(clienteId: string, nome: string) {
     const confirmado = window.confirm(
@@ -31,7 +33,14 @@ export default function ClientesPage() {
 
   const termoBusca = busca.trim().toLowerCase();
   const clientes = db.clientes
-    .filter((c) => (!projetosPermitidos || projetosPermitidos.has(c.projetoId)) && (filtroProjeto ? c.projetoId === filtroProjeto : true) && (!filtroStatus || c.status === filtroStatus))
+    .filter((c) => {
+      const statusSaude = obterStatusSaudeCliente(db, c);
+      const emAcompanhamento = statusSaude !== "INATIVO";
+      return (!projetosPermitidos || projetosPermitidos.has(c.projetoId))
+        && (!filtroProjeto || c.projetoId === filtroProjeto)
+        && (!filtroStatus || statusSaude === filtroStatus)
+        && (!filtroOperacional || (filtroOperacional === "EM_ACOMPANHAMENTO" ? emAcompanhamento : !emAcompanhamento));
+    })
     .filter((c) => (termoBusca ? c.nome.toLowerCase().includes(termoBusca) : true))
     .slice()
     .sort((a, b) => a.nome.localeCompare(b.nome))
@@ -40,7 +49,7 @@ export default function ClientesPage() {
       const risco = db.riscosChurn
         .filter((r) => r.clienteId === cliente.id)
         .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0];
-      return { cliente, projeto, risco };
+      return { cliente: { ...cliente, status: obterStatusSaudeCliente(db, cliente) }, projeto, risco };
     });
 
   return (
@@ -50,18 +59,19 @@ export default function ClientesPage() {
         {podeGerenciar && <Link href="/clientes/novo" className="action-button action-primary">+ Novo cliente</Link>}
       </div>
 
-      <div className="grid gap-2 rounded-xl border border-neutral-200 bg-white p-3 md:grid-cols-[1fr_220px_180px]">
+      <div className="grid grid-cols-1 gap-2 rounded-xl border border-neutral-200 bg-white p-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_repeat(3,minmax(0,190px))]">
         <input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           aria-label="Buscar cliente"
           placeholder="Buscar por nome..."
-          className="min-w-[200px]"
+          className="w-full min-w-0"
         />
         <select
           value={filtroProjeto}
           onChange={(e) => setFiltroProjeto(e.target.value)}
           aria-label="Filtrar por projeto"
+          className="w-full min-w-0"
         >
           <option value="">Todos os projetos</option>
           {projetos.map((p) => (
@@ -70,8 +80,11 @@ export default function ClientesPage() {
             </option>
           ))}
         </select>
-        <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} aria-label="Filtrar por status">
-          <option value="">Todos os status</option><option value="ATIVO">Ativo</option><option value="EM_RISCO">Em risco</option><option value="INATIVO">Inativo</option>
+        <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} aria-label="Filtrar por status" className="w-full min-w-0">
+          <option value="">Todas as classificações</option><option value="SAUDAVEL">Saudável</option><option value="EM_RISCO">Em risco</option><option value="NEUTRO">Neutro · sem avaliação</option>
+        </select>
+        <select value={filtroOperacional} onChange={(e) => setFiltroOperacional(e.target.value)} aria-label="Filtrar por situação do contrato" className="w-full min-w-0">
+          <option value="">Todas as situações</option><option value="EM_ACOMPANHAMENTO">Em acompanhamento</option><option value="INATIVO">Inativo · contrato encerrado</option>
         </select>
       </div>
 

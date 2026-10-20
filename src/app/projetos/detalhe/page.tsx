@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
+import { useAuth, isAdminGeral, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { mutateDb, novoId, excluirProjeto, excluirCliente } from "@/lib/store";
-import { calcularSaudeProjeto, obterResumoSaudeProjeto } from "@/lib/churn";
+import { materializarEscopoProjetosUsuario, mutateDb, novoId, excluirProjeto, excluirCliente } from "@/lib/store";
+import { calcularSaudeProjeto, obterResumoSaudeProjeto, obterStatusSaudeCliente } from "@/lib/churn";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
 import type { Periodicidade } from "@/lib/types";
 
@@ -61,6 +61,7 @@ export default function ProjetoDetalhePage() {
     .filter((c) => (termoBusca ? c.nome.toLowerCase().includes(termoBusca) : true))
     .map((c) => ({
       ...c,
+      status: obterStatusSaudeCliente(db, c),
       risco: db.riscosChurn
         .filter((r) => r.clienteId === c.id)
         .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0],
@@ -149,7 +150,14 @@ export default function ProjetoDetalhePage() {
       alert("Selecione um usuário");
       return;
     }
+    if (usuarioId === user!.id && !isAdminGeral(user!)) {
+      alert("Por segurança, você não pode conceder acesso a projetos para si mesmo.");
+      return;
+    }
     mutateDb((dbW) => {
+      const usuario = dbW.usuarios.find((u) => u.id === usuarioId);
+      if (!usuario || usuarioId === user!.id || isAdminGeral(usuario)) return;
+      materializarEscopoProjetosUsuario(dbW, usuario);
       const existente = dbW.acessosProjeto.find((a) => a.usuarioId === usuarioId && a.projetoId === id);
       if (!existente) {
         dbW.acessosProjeto.push({ id: novoId("acesso"), usuarioId, projetoId: id, criadoEm: new Date().toISOString() });
@@ -159,7 +167,12 @@ export default function ProjetoDetalhePage() {
   }
 
   function revogarAcesso(usuarioId: string) {
+    if (usuarioId === user!.id) return;
+    if (db!.usuarios.some((usuario) => usuario.id === usuarioId && isAdminGeral(usuario))) return;
     mutateDb((dbW) => {
+      const usuario = dbW.usuarios.find((u) => u.id === usuarioId);
+      if (!usuario || usuarioId === user!.id || isAdminGeral(usuario)) return;
+      materializarEscopoProjetosUsuario(dbW, usuario);
       dbW.acessosProjeto = dbW.acessosProjeto.filter((a) => !(a.usuarioId === usuarioId && a.projetoId === id));
     });
   }
@@ -352,9 +365,7 @@ export default function ProjetoDetalhePage() {
                 <span className="text-sm text-neutral-800">
                   {a.usuario.nome} ({a.usuario.papel})
                 </span>
-                <button onClick={() => revogarAcesso(a.usuarioId)} className="inline-action inline-action-danger">
-                  Revogar
-                </button>
+                {(a.usuarioId !== user.id && !isAdminGeral(a.usuario)) && <button type="button" onClick={() => revogarAcesso(a.usuarioId)} className="inline-action inline-action-danger">Revogar</button>}
               </div>
             ))}
             {acessos.length === 0 && <p className="text-sm text-neutral-500">Nenhum usuário com acesso direto ainda.</p>}
@@ -362,7 +373,7 @@ export default function ProjetoDetalhePage() {
           <form onSubmit={concederAcesso} className="flex gap-2">
             <select name="usuarioId" aria-label="Usuário para conceder acesso ao projeto" className="flex-1 rounded-md border border-neutral-300 px-2 py-1.5 text-sm" defaultValue="">
               <option value="">Selecione um usuário...</option>
-              {usuarios.map((u) => (
+              {usuarios.filter((u) => u.id !== user.id && !isAdminGeral(u)).map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.nome} ({u.papel})
                 </option>

@@ -135,7 +135,9 @@ export default function CicloClienteDetalhePage() {
   const [statusImportacao, setStatusImportacao] = useState("");
 
   if (!pronto || !db || !user) return null;
+  if (!temPermissao(user, "verProjetos")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar projetos.</p>;
   if (!podeAcessarProjeto(user, projetoId)) return <p className="text-sm text-neutral-500">Sem acesso a este projeto.</p>;
+  if (!temPermissao(user, "calcularSaude")) return <p className="text-sm text-neutral-500">Você não tem permissão para registrar avaliações ou calcular saúde.</p>;
 
   const ciclo = db.ciclosAvaliacao.find((c) => c.id === cicloId && c.projetoId === projetoId);
   if (!ciclo) return <p className="text-sm text-neutral-500">Ciclo não encontrado.</p>;

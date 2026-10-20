@@ -1,7 +1,7 @@
 "use client";
 
 import { getDb, mutateDb, novoId } from "./store";
-import type { Database, NivelRisco } from "./types";
+import type { Cliente, Database, NivelRisco, StatusCliente } from "./types";
 
 function media(valores: number[]) {
   if (valores.length === 0) return null;
@@ -13,6 +13,20 @@ function classificarRisco(scoreSaudeGeral: number): NivelRisco {
   if (scoreSaudeGeral >= 6) return "MEDIO";
   if (scoreSaudeGeral >= 4) return "ALTO";
   return "CRITICO";
+}
+
+export function statusPorScoreSaude(score: number | null | undefined): Exclude<StatusCliente, "INATIVO"> {
+  if (typeof score !== "number" || !Number.isFinite(score)) return "NEUTRO";
+  return score >= 8 ? "SAUDAVEL" : "EM_RISCO";
+}
+
+/** Usa a avaliação mais recentemente calculada; clientes encerrados seguem inativos. */
+export function obterStatusSaudeCliente(db: Database, cliente: Cliente): StatusCliente {
+  if (cliente.status === "INATIVO") return "INATIVO";
+  const maisRecente = db.riscosChurn
+    .filter((risco) => risco.clienteId === cliente.id)
+    .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0];
+  return statusPorScoreSaude(maisRecente?.scoreSaudeGeral);
 }
 
 export interface ResumoSaudeProjeto {
@@ -169,6 +183,8 @@ export function calcularRiscoChurn(cicloId: string, clienteId: string) {
         : scoreAtivo ?? scorePassivo ?? 0;
 
     const nivelRisco = classificarRisco(scoreSaudeGeral);
+
+    if (cliente.status !== "INATIVO") cliente.status = statusPorScoreSaude(scoreSaudeGeral);
 
     let riscoChurn = db.riscosChurn.find((r) => r.cicloId === cicloId && r.clienteId === clienteId);
     if (riscoChurn) {

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useAuth, getProjetoIdsDoUsuario, temPermissao } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, isAdminGeral, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId } from "@/lib/store";
 import Link from "next/link";
@@ -18,9 +18,10 @@ export default function NovoClientePage() {
   const [salvando, setSalvando] = useState(false);
 
   if (!pronto || !db || !user) return null;
+  if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
   if (!temPermissao(user, "gerenciarClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para gerenciar clientes.</p>;
 
-  const projetosPermitidos = user.papel === "ADMIN" ? null : new Set(getProjetoIdsDoUsuario(user.id));
+  const projetosPermitidos = isAdminGeral(user) ? null : new Set(getProjetoIdsDoUsuario(user.id));
   const projetos = db.projetos.filter((p) => !projetosPermitidos || projetosPermitidos.has(p.id)).slice().sort((a, b) => a.nome.localeCompare(b.nome));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -63,7 +64,7 @@ export default function NovoClientePage() {
         cnpj,
         segmento,
         inicioContrato,
-        status: "ATIVO",
+        status: "NEUTRO",
         criadoEm: agora,
       });
       if (contatoNome) {
@@ -78,13 +79,6 @@ export default function NovoClientePage() {
           criadoEm: agora,
         });
       }
-      dbW.perfisRisco.push({
-        id: novoId("perfil"),
-        clienteId,
-        propensaoRisco: 0,
-        tendencia: "ESTAVEL",
-        atualizadoEm: agora,
-      });
     });
 
     router.push(`/clientes/detalhe?id=${clienteId}`);

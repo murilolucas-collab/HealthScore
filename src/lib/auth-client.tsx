@@ -26,7 +26,6 @@ export const PERMISSOES_PADRAO: Record<ModuloUsuario, boolean> = {
   verProjetos: true,
   verClientes: true,
   gerenciarClientes: false,
-  alterarStatusCliente: false,
   calcularSaude: true,
 };
 
@@ -35,7 +34,6 @@ export const PERMISSOES_TOTAIS: Record<ModuloUsuario, boolean> = {
   verProjetos: true,
   verClientes: true,
   gerenciarClientes: true,
-  alterarStatusCliente: true,
   calcularSaude: true,
 };
 
@@ -153,10 +151,20 @@ export function useAuth() {
 
 export function getProjetoIdsDoUsuario(usuarioId: string): string[] {
   const db = getDb();
+  const usuario = db.usuarios.find((u) => u.id === usuarioId);
+  if (!usuario) return [];
+  if (isAdminGeral(usuario)) return db.projetos.map((projeto) => projeto.id);
+  // Compatibilidade: admins criados antes do escopo por projeto tinham acesso
+  // global. O marcador vira true somente quando o escopo é salvo explicitamente.
+  if (usuario.papel === "ADMIN" && usuario.escopoProjetosConfigurado !== true) {
+    return db.projetos.map((projeto) => projeto.id);
+  }
   return db.acessosProjeto.filter((a) => a.usuarioId === usuarioId).map((a) => a.projetoId);
 }
 
 export function podeAcessarProjeto(user: SessionUser, projetoId: string): boolean {
-  if (user.papel === "ADMIN") return true;
+  // Admin Geral é o único usuário com acesso implícito a toda a carteira.
+  // Para todos os demais, inclusive ADMIN, a relação individual é obrigatória.
+  if (isAdminGeral(user)) return true;
   return getProjetoIdsDoUsuario(user.id).includes(projetoId);
 }

@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth, podeAcessarProjeto, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
-import { getDb, mutateDb, novoId, excluirCliente } from "@/lib/store";
-import { salvarDbRemoto } from "@/lib/github-sync";
+import { mutateDb, novoId, excluirCliente } from "@/lib/store";
 import { Card, StatusBadge, RiscoBadge } from "@/components/ui";
-import type { TipoEvento, StatusCliente } from "@/lib/types";
+import type { TipoEvento } from "@/lib/types";
+import { obterStatusSaudeCliente } from "@/lib/churn";
 
 const TIPO_EVENTO_LABEL: Record<string, string> = {
   RECLAMACAO: "Reclamação",
@@ -39,9 +38,6 @@ export default function ClienteDetalhePage() {
   const router = useRouter();
   const { user, pronto } = useAuth();
   const db = useDb();
-  const [statusSalvo, setStatusSalvo] = useState(false);
-  const [salvandoStatus, setSalvandoStatus] = useState(false);
-  const [erroStatus, setErroStatus] = useState("");
 
   if (!pronto || !db || !user) return null;
   if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
@@ -52,11 +48,15 @@ export default function ClienteDetalhePage() {
   const contatos = db.contatosCliente.filter((c) => c.clienteId === id);
   const perfilRisco = db.perfisRisco.find((p) => p.clienteId === id);
   const projeto = db.projetos.find((p) => p.id === cliente.projetoId);
-  if (user.papel !== "ADMIN" && !podeAcessarProjeto(user, cliente.projetoId)) {
+  const cicloAberto = db.ciclosAvaliacao
+    .filter((ciclo) => ciclo.projetoId === cliente.projetoId && ciclo.status === "ABERTO")
+    .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime())[0];
+  if (!podeAcessarProjeto(user, cliente.projetoId)) {
     return <p className="text-sm text-neutral-500">Você não tem acesso ao projeto deste cliente.</p>;
   }
   const podeGerenciar = temPermissao(user, "gerenciarClientes");
-  const podeAlterarStatus = temPermissao(user, "alterarStatusCliente");
+  const podeVerProjetos = temPermissao(user, "verProjetos");
+  const statusSaude = obterStatusSaudeCliente(db, cliente);
   const riscoAtual = db.riscosChurn
     .filter((r) => r.clienteId === id)
     .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0];
@@ -154,32 +154,6 @@ export default function ClienteDetalhePage() {
     });
   }
 
-  async function handleStatus(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!podeAlterarStatus || salvandoStatus) return;
-    const formData = new FormData(e.currentTarget);
-    const status = String(formData.get("status") ?? "ATIVO") as StatusCliente;
-    setSalvandoStatus(true);
-    setStatusSalvo(false);
-    setErroStatus("");
-    mutateDb((dbW) => {
-      const c = dbW.clientes.find((cl) => cl.id === id);
-      if (c) c.status = status;
-    });
-    try {
-      const resultado = await salvarDbRemoto(getDb());
-      if (!resultado.ok) {
-        setErroStatus(`O status foi alterado neste navegador, mas não foi possível salvar no servidor: ${resultado.erro}`);
-        return;
-      }
-      setStatusSalvo(true);
-    } catch {
-      setErroStatus("O status foi alterado neste navegador, mas não foi possível salvar no servidor. Tente novamente.");
-    } finally {
-      setSalvandoStatus(false);
-    }
-  }
-
   function handleExcluir() {
     if (!podeGerenciar) return;
     if (
@@ -214,8 +188,8 @@ export default function ClienteDetalhePage() {
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <div className="grid gap-1">
-            <span className="text-[11px] font-medium text-neutral-500">Status manual</span>
-            <StatusBadge status={cliente.status} />
+            <span className="text-[11px] font-medium text-neutral-500">Saúde do cliente</span>
+            <StatusBadge status={statusSaude} />
           </div>
           <div className="grid gap-1">
             <span className="text-[11px] font-medium text-neutral-500">Saúde calculada</span>
@@ -229,22 +203,38 @@ export default function ClienteDetalhePage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4">
-        {cliente.status !== "INATIVO" ? (
+        {statusSaude !== "INATIVO" ? (
           <>
-            {podeAlterarStatus ? <form onSubmit={handleStatus} className="flex items-center gap-2">
-              <label htmlFor="cliente-status-manual" className="text-sm text-neutral-600">Status manual do cliente:</label>
-              <select id="cliente-status-manual" name="status" defaultValue={cliente.status} onChange={() => { setStatusSalvo(false); setErroStatus(""); }} disabled={salvandoStatus} className="rounded-md border border-neutral-300 px-2 py-1 text-sm disabled:opacity-60">
-                <option value="ATIVO">Ativo</option>
-                <option value="EM_RISCO">Em risco</option>
-              </select>
-              <button disabled={salvandoStatus} className="inline-action inline-action-secondary disabled:opacity-60">{salvandoStatus ? "Salvando…" : "Salvar"}</button>
-              {statusSalvo && <span role="status" className="text-xs text-emerald-700">Status salvo</span>}
-              {erroStatus && <span role="alert" className="text-xs text-red-700">{erroStatus}</span>}
-            </form> : <span className="text-sm text-neutral-500">Status do cliente: {cliente.status === "EM_RISCO" ? "Em risco" : "Ativo"}</span>}
+            <p className="mb-0 text-sm text-neutral-600" role="status">
+              {statusSaude === "NEUTRO"
+                ? "Aguardando a primeira avaliação de saúde. O status será calculado automaticamente após registrar e calcular um ciclo."
+                : `Classificação automática baseada na avaliação de saúde mais recente${riscoAtual ? ` (nota ${riscoAtual.scoreSaudeGeral.toFixed(1)}/10)` : ""}.`}
+            </p>
+            {statusSaude === "NEUTRO" && (cicloAberto ? (
+              <Link
+                href={`/projetos/ciclo/cliente?projetoId=${cliente.projetoId}&cicloId=${cicloAberto.id}&clienteId=${cliente.id}`}
+                className="action-button action-primary"
+              >
+                Começar avaliação deste ciclo
+              </Link>
+            ) : projeto ? (
+              podeVerProjetos ? (
+                <div className="grid gap-1">
+                  <Link href={`/projetos/detalhe?id=${projeto.id}`} className="action-button action-primary">
+                    Abrir ciclo de avaliação
+                  </Link>
+                  <span className="text-xs text-neutral-500">No projeto, escolha “Abrir novo ciclo agora” para iniciar a avaliação.</span>
+                </div>
+              ) : (
+                <span className="text-xs text-neutral-500">Peça ao administrador acesso ao módulo Projetos para iniciar um ciclo de avaliação deste cliente.</span>
+              )
+            ) : (
+              <span className="text-xs text-neutral-500">Vincule o cliente a um projeto para iniciar um ciclo de avaliação.</span>
+            ))}
             {podeGerenciar && <Link href={`/clientes/saida?id=${cliente.id}`} className="inline-action inline-action-danger">Encerrar cliente (registrar saída)</Link>}
           </>
         ) : (
-          <span className="text-sm text-neutral-500">Cliente encerrado — veja o formulário de saída abaixo.</span>
+          <span className="text-sm text-neutral-500">Inativo por encerramento de contrato — veja o formulário de saída abaixo.</span>
         )}
         {podeGerenciar && <button onClick={handleExcluir} className="inline-action inline-action-danger ml-auto">Excluir cliente definitivamente</button>}
       </div>
@@ -349,6 +339,9 @@ export default function ClienteDetalhePage() {
 
       <Card>
         <h2 className="font-medium text-neutral-900 mb-3">Histórico do cliente (reclamações, intervenções, ações de CS...)</h2>
+        <p className="mb-4 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-900">
+          Estas anotações são registros livres e não alteram o score de saúde. A classificação muda quando uma avaliação de ciclo é registrada e a saúde do cliente é calculada.
+        </p>
         {podeGerenciar && <form onSubmit={handleEvento} className="grid md:grid-cols-3 gap-2 mb-4">
           <select name="tipo" aria-label="Tipo de evento do histórico" className="rounded-md border border-neutral-300 px-2 py-1.5 text-sm">
             {Object.entries(TIPO_EVENTO_LABEL).map(([valor, label]) => (

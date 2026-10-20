@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-client";
+import { isAdminGeral, useAuth, temPermissao } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, novoId } from "@/lib/store";
 import { Card } from "@/components/ui";
@@ -12,8 +12,11 @@ export default function NovoProjetoPage() {
   const router = useRouter();
 
   if (!pronto || !db || !user) return null;
-  if (user.papel !== "ADMIN") {
-    return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
+  if (!temPermissao(user, "verProjetos")) {
+    return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar projetos.</p>;
+  }
+  if (!isAdminGeral(user)) {
+    return <p className="text-sm text-neutral-500">Somente o Admin Geral pode criar projetos e definir novos acessos fora de um escopo já autorizado.</p>;
   }
 
   const usuarios = db.usuarios.slice().sort((a, b) => a.nome.localeCompare(b.nome));
@@ -47,17 +50,18 @@ export default function NovoProjetoPage() {
         diaDisparo: 1,
         ativo: true,
       });
-      if (csResponsavelId) {
+      const responsavel = dbW.usuarios.find((usuario) => usuario.id === csResponsavelId);
+      if (responsavel && responsavel.id !== user!.id && !isAdminGeral(responsavel)) {
         dbW.acessosProjeto.push({
           id: novoId("acesso"),
-          usuarioId: csResponsavelId,
+          usuarioId: responsavel.id,
           projetoId,
           criadoEm: new Date().toISOString(),
         });
       }
     });
 
-    router.push(`/projetos/detalhe?id=${projetoId}`);
+    router.push("/projetos");
   }
 
   return (
@@ -84,7 +88,7 @@ export default function NovoProjetoPage() {
                 </option>
               ))}
             </select>
-            <p className="text-xs text-neutral-500 mt-1">O CS escolhido recebe acesso automático a este projeto.</p>
+            <p className="text-xs text-neutral-500 mt-1">O CS indicado recebe acesso explícito ao novo projeto. O Admin Geral mantém acesso total.</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Data de início</label>

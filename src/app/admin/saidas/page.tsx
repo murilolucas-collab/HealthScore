@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAuth } from "@/lib/auth-client";
+import { useAuth, getProjetoIdsDoUsuario, isAdminGeral } from "@/lib/auth-client";
 import { useDb } from "@/lib/useDb";
 import { mutateDb, excluirFormularioSaida } from "@/lib/store";
 import { Card } from "@/components/ui";
+import { statusPorScoreSaude } from "@/lib/churn";
 
 const MOTIVO_LABEL: Record<string, string> = {
   PRECO: "Preço",
@@ -29,6 +30,7 @@ export default function MotivosSaidaPage() {
     return <p className="text-sm text-neutral-500">Ação restrita a administradores.</p>;
   }
 
+  const projetosPermitidos = isAdminGeral(user) ? null : new Set(getProjetoIdsDoUsuario(user.id));
   const saidas = db.formulariosSaida
     .slice()
     .sort((a, b) => new Date(b.dataSaida).getTime() - new Date(a.dataSaida).getTime())
@@ -36,7 +38,8 @@ export default function MotivosSaidaPage() {
       ...s,
       cliente: db.clientes.find((c) => c.id === s.clienteId),
       responsavel: db.usuarios.find((u) => u.id === s.responsavelId),
-    }));
+    }))
+    .filter((s) => s.cliente && (!projetosPermitidos || projetosPermitidos.has(s.cliente.projetoId)));
 
   const contagemPorMotivo = new Map<string, number>();
   let evitaveis = 0;
@@ -48,6 +51,8 @@ export default function MotivosSaidaPage() {
   const maiorContagem = motivosOrdenados[0]?.[1] ?? 1;
 
   function handleExcluir(formularioId: string, clienteId: string, clienteNome?: string) {
+    const cliente = db!.clientes.find((c) => c.id === clienteId);
+    if (!cliente || (projetosPermitidos && !projetosPermitidos.has(cliente.projetoId))) return;
     if (
       !window.confirm(
         `Excluir o registro de saída de "${clienteNome ?? "cliente"}"? Isso reativa o cliente (volta a aparecer normalmente no sistema). Essa ação não pode ser desfeita.`
@@ -60,7 +65,12 @@ export default function MotivosSaidaPage() {
       const aindaTemOutraSaida = dbW.formulariosSaida.some((f) => f.clienteId === clienteId);
       if (!aindaTemOutraSaida) {
         const c = dbW.clientes.find((cl) => cl.id === clienteId);
-        if (c) c.status = "ATIVO";
+        if (c && c.status === "INATIVO") {
+          const ultimaSaude = dbW.riscosChurn
+            .filter((risco) => risco.clienteId === clienteId)
+            .sort((a, b) => new Date(b.calculadoEm).getTime() - new Date(a.calculadoEm).getTime())[0];
+          c.status = statusPorScoreSaude(ultimaSaude?.scoreSaudeGeral);
+        }
       }
     });
   }

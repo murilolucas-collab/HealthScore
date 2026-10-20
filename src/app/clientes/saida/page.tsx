@@ -41,13 +41,14 @@ export default function FormularioSaidaPage() {
   }, [clienteEncerrado, cliente, router]);
 
   if (!pronto || !db || !user) return null;
+  if (!temPermissao(user, "verClientes")) return <p className="text-sm text-neutral-500">Você não tem permissão para visualizar clientes.</p>;
   if (!cliente) return <p className="text-sm text-neutral-500">Cliente não encontrado.</p>;
 
-  if (user.papel !== "ADMIN" && !podeAcessarProjeto(user, cliente.projetoId)) {
+  if (!podeAcessarProjeto(user, cliente.projetoId)) {
     return <p className="text-sm text-neutral-500">Cliente não encontrado.</p>;
   }
 
-  if (!temPermissao(user, "gerenciarClientes") || !temPermissao(user, "alterarStatusCliente")) {
+  if (!temPermissao(user, "gerenciarClientes")) {
     return <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Seu usuário não tem permissão para encerrar clientes.</p>;
   }
 
