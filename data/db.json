@@ -182,6 +182,26 @@
       "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
       "dataOcorrencia": "2026-10-16T13:13:33.676Z",
       "criadoEm": "2026-10-16T13:13:33.676Z"
+    },
+    {
+      "id": "evento_d0a7c0a2-259a-4e17-b839-f5d754c293de",
+      "clienteId": "cliente_a8878c41-eaf2-48b0-8953-2856ec35a2ed",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "tipo": "RECLAMACAO",
+      "descricao": "valor alto",
+      "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataOcorrencia": "2026-10-20T12:39:56.522Z",
+      "criadoEm": "2026-10-20T12:39:56.522Z"
+    },
+    {
+      "id": "evento_17eb172a-c20f-4946-b97d-6c1aa0431185",
+      "clienteId": "cliente_a8878c41-eaf2-48b0-8953-2856ec35a2ed",
+      "projetoId": "projeto_18ab67fd-f01d-4091-8280-221c4adc2dd4",
+      "tipo": "RECLAMACAO",
+      "descricao": "nao vende",
+      "autorId": "usuario_646eb3d2-a060-4778-8c93-e5dbca8ec2d3",
+      "dataOcorrencia": "2026-10-20T12:39:58.420Z",
+      "criadoEm": "2026-10-20T12:39:58.420Z"
     }
   ],
   "perfisRisco": [
